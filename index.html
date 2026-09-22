@@ -202,15 +202,47 @@
     }
 
     .result-item {
-        display: grid;
-        grid-template-columns: 28px 1fr 1fr;
-        gap: 10px;
-        align-items: start;
         padding: 12px 0;
         border-bottom: 1px solid var(--border);
     }
 
     .result-item:last-child { border-bottom: 0; }
+
+    /* A lenyitható sor egyetlen rendezett sor legyen: nyíl | pipa | szöveg. */
+    details.result-item > summary {
+        display: grid;
+        grid-template-columns: 18px 28px minmax(0, 1fr);
+        gap: 8px;
+        align-items: start;
+        cursor: pointer;
+        list-style: none;
+    }
+
+    details.result-item > summary::-webkit-details-marker {
+        display: none;
+    }
+
+    details.result-item > summary::before {
+        content: "▶";
+        font-size: 12px;
+        line-height: 26px;
+        color: var(--text);
+    }
+
+    details.result-item[open] > summary::before {
+        content: "▼";
+    }
+
+    .locked-result {
+        display: grid;
+        grid-template-columns: 28px minmax(0, 1fr);
+        gap: 8px;
+        align-items: start;
+    }
+
+    .result-icon {
+        line-height: 26px;
+    }
 
     .result-icon.good { color: var(--good); font-weight: 800; }
     .result-icon.bad { color: var(--bad); font-weight: 800; }
@@ -283,8 +315,12 @@
         .card { padding: 18px; }
         .word { font-size: 32px; }
         .answer-row { flex-direction: column; }
-        .result-item { grid-template-columns: 26px 1fr; }
-        .result-detail { grid-column: 2; }
+        details.result-item > summary {
+            grid-template-columns: 18px 26px minmax(0, 1fr);
+        }
+        .locked-result {
+            grid-template-columns: 26px minmax(0, 1fr);
+        }
         .topbar { align-items: flex-start; flex-direction: column; }
     }
 </style>
