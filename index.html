@@ -79,7 +79,7 @@
     .choice-button { background:#eef2ff; color:#312e81; border:1px solid #c7d2fe; }
     .choice-button:hover { background:#e0e7ff; }
     .word-list { margin-top:18px; overflow-x:auto; }
-    .word-list-row { display:grid; grid-template-columns:max-content 28px minmax(180px,1fr); column-gap:8px; align-items:baseline; padding:7px 0; border-bottom:1px solid var(--border); font-size:17px; }
+    .word-list-row { display:grid; grid-template-columns:280px 28px minmax(180px,1fr); column-gap:8px; align-items:baseline; padding:7px 0; border-bottom:1px solid var(--border); font-size:17px; }
     .word-list-row .german { font-weight:600; }
     .word-list-row .dash { text-align:center; color:var(--muted); }
     .word-list-header { font-size:14px; color:var(--muted); font-weight:650; border-bottom:2px solid var(--border); }
@@ -277,6 +277,7 @@
     }
 
     @media (max-width: 600px) {
+        .word-list-row { grid-template-columns:220px 28px minmax(180px,1fr); }
         .container { width: min(100% - 20px, 900px); margin-top: 20px; }
         .card { padding: 18px; }
         .word { font-size: 32px; }
