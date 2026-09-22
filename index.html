@@ -118,168 +118,187 @@
     .question-label {
         color: var(--muted);
         font-size: 15px;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
     }
 
     .word {
-        font-size: 40px;
+        font-size: 38px;
         font-weight: 700;
-        margin-bottom: 22px;
+        margin-bottom: 24px;
     }
 
     .answer-row {
         display: flex;
-        max-width: 600px;
-        margin: auto;
+        justify-content: center;
         gap: 10px;
     }
 
-    input[type="text"] {
-        flex: 1;
-        min-width: 0;
-        font: inherit;
-        font-size: 20px;
+    .answer-row input {
+        width: min(500px, 100%);
         padding: 13px 15px;
-        border: 2px solid var(--border);
+        border: 1px solid #cbd5e1;
         border-radius: 10px;
+        font: inherit;
+        font-size: 18px;
         outline: none;
     }
 
-    input[type="text"]:focus {
+    .answer-row input:focus {
         border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(79,70,229,.12);
     }
 
     .feedback {
-        min-height: 72px;
-        margin-top: 20px;
+        min-height: 88px;
+        margin-top: 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         border-radius: 12px;
-        padding: 15px 18px;
-        text-align: center;
+        padding: 12px;
         font-size: 18px;
-        font-weight: 600;
+        font-weight: 700;
     }
 
     .feedback.good {
         color: var(--good);
         background: var(--good-bg);
-        animation: pop .25s ease-out;
     }
 
     .feedback.bad {
         color: var(--bad);
         background: var(--bad-bg);
-        animation: shake .28s ease-in-out;
     }
 
     .correct-answer {
         display: block;
-        margin-top: 5px;
-        font-weight: 700;
-    }
-
-    @keyframes pop {
-        0% {
-            transform: scale(.96);
-            opacity: .5;
-        }
-
-        100% {
-            transform: scale(1);
-            opacity: 1;
-        }
-    }
-
-    @keyframes shake {
-        0%,100% {
-            transform: translateX(0);
-        }
-
-        25% {
-            transform: translateX(-7px);
-        }
-
-        75% {
-            transform: translateX(7px);
-        }
+        margin-top: 7px;
+        font-weight: 500;
     }
 
     .results {
-        margin-top: 28px;
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
     }
 
     .result-item {
         display: grid;
-        grid-template-columns: 28px 1fr 1fr;
+        grid-template-columns: 26px 1fr;
         gap: 10px;
         align-items: start;
-        padding: 12px 0;
-        border-bottom: 1px solid var(--border);
+        padding: 11px 13px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fafafa;
     }
 
-    .result-item:last-child {
-        border-bottom: 0;
+    details.result-item {
+        display: block;
+    }
+
+    details.result-item summary {
+        cursor: pointer;
+        list-style: none;
+        display: grid;
+        grid-template-columns: 26px 1fr;
+        gap: 10px;
+        align-items: start;
+    }
+
+    details.result-item summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .locked-result {
+        cursor: default;
+    }
+
+    .result-icon {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
     }
 
     .result-icon.good {
         color: var(--good);
-        font-weight: 800;
+        background: var(--good-bg);
     }
 
     .result-icon.bad {
         color: var(--bad);
-        font-weight: 800;
+        background: var(--bad-bg);
     }
 
     .result-hu {
-        font-weight: 600;
+        font-weight: 650;
     }
 
     .result-detail {
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .result-attempts {
+        margin: 10px 0 0 36px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .round-summary {
+        padding: 12px 14px;
+        background: #f8fafc;
+        border-radius: 10px;
         color: var(--muted);
     }
 
-    .result-detail strong {
+    .round-summary strong {
         color: var(--text);
     }
 
     .summary {
         display: flex;
-        gap: 24px;
+        gap: 35px;
+        margin: 20px 0 25px;
         flex-wrap: wrap;
-        margin-bottom: 20px;
     }
 
     .summary-number {
-        font-size: 30px;
-        font-weight: 750;
+        font-size: 26px;
+        font-weight: 800;
     }
 
     .summary-label {
         color: var(--muted);
         font-size: 14px;
+        margin-top: 3px;
     }
 
     .history-list {
-        display: grid;
+        display: flex;
+        flex-direction: column;
         gap: 10px;
     }
 
     .history-item {
         width: 100%;
         text-align: left;
-        background: #fafafa;
+        background: #f8fafc;
         border: 1px solid var(--border);
-        padding: 15px;
-    }
-
-    .history-item:hover {
-        background: #f3f4f6;
     }
 
     .history-main {
         display: flex;
         justify-content: space-between;
-        gap: 15px;
+        gap: 12px;
         font-weight: 650;
     }
 
@@ -320,17 +339,13 @@
             flex-direction: column;
         }
 
-        .result-item {
-            grid-template-columns: 26px 1fr;
-        }
-
-        .result-detail {
-            grid-column: 2;
-        }
-
         .topbar {
             align-items: flex-start;
             flex-direction: column;
+        }
+
+        .result-item {
+            grid-template-columns: 26px 1fr;
         }
     }
 </style>
@@ -341,61 +356,33 @@
 <div class="container">
 
     <h1>🇩🇪 Német szótanuló</h1>
-
-    <div class="subtitle">
-        Magyar → német gyakorlás
-    </div>
-
-
-    <!-- SZÓCSOPORTOK -->
+    <div class="subtitle">Magyar → német gyakorlás</div>
 
     <section id="catalogScreen" class="card">
-
         <div class="topbar">
-
             <h2>Válassz egy szócsoportot</h2>
-
-            <button id="historyButton" class="secondary">
-                Előzmények
-            </button>
-
+            <button id="historyButton" class="secondary">Előzmények</button>
         </div>
 
         <div id="catalogList" class="catalog-list"></div>
-
         <div id="catalogError"></div>
-
     </section>
 
-
-    <!-- GYAKORLÁS -->
 
     <section id="practiceScreen" class="card hidden">
 
         <div class="topbar">
-
             <div>
-
                 <h2 id="practiceTitle"></h2>
-
-                <div id="counter"
-                     class="subtitle"
-                     style="margin:0">
-                </div>
-
+                <div id="counter" class="subtitle" style="margin:0"></div>
             </div>
 
-            <button id="backButton" class="secondary">
-                Vissza
-            </button>
-
+            <button id="backButton" class="secondary">Vissza</button>
         </div>
-
 
         <div class="progress">
             <div id="progressBar"></div>
         </div>
-
 
         <div id="questionArea">
 
@@ -405,120 +392,86 @@
                     Fordítsd németre:
                 </div>
 
-                <div id="questionWord"
-                     class="word">
-                </div>
+                <div id="questionWord" class="word"></div>
 
+                <form id="answerForm" class="answer-row">
 
-                <form id="answerForm"
-                      class="answer-row">
+                    <input
+                        id="answerInput"
+                        type="text"
+                        autocomplete="off"
+                        spellcheck="false"
+                        autofocus
+                    >
 
-                    <input id="answerInput"
-                           type="text"
-                           autocomplete="off"
-                           spellcheck="false"
-                           autofocus>
-
-                    <button class="primary"
-                            type="submit">
+                    <button class="primary" type="submit">
                         Ellenőrzés
                     </button>
 
                 </form>
 
-
-                <div id="feedback"
-                     class="feedback">
-                </div>
+                <div id="feedback" class="feedback"></div>
 
             </div>
 
         </div>
 
-
-        <div id="currentResults"
-             class="results">
-        </div>
+        <div id="currentResults" class="results"></div>
 
     </section>
 
 
-    <!-- KÖR VÉGE -->
-
-    <section id="summaryScreen"
-             class="card hidden">
+    <section id="summaryScreen" class="card hidden">
 
         <div class="topbar">
 
             <h2>Kör vége</h2>
 
-            <button id="summaryBackButton"
-                    class="secondary">
+            <button id="summaryBackButton" class="secondary">
                 Szócsoportok
             </button>
 
         </div>
 
+        <div id="summaryStats" class="summary"></div>
 
-        <div id="summaryStats"
-             class="summary">
-        </div>
-
-        <div id="summaryResults"
-             class="results">
-        </div>
+        <div id="summaryResults" class="results"></div>
 
     </section>
 
 
-    <!-- ELŐZMÉNYEK -->
-
-    <section id="historyScreen"
-             class="card hidden">
+    <section id="historyScreen" class="card hidden">
 
         <div class="topbar">
 
             <h2>Előzmények</h2>
 
-            <button id="historyBackButton"
-                    class="secondary">
+            <button id="historyBackButton" class="secondary">
                 Szócsoportok
             </button>
 
         </div>
 
-
-        <div id="historyList"
-             class="history-list">
-        </div>
+        <div id="historyList" class="history-list"></div>
 
     </section>
 
 
-    <!-- ELŐZMÉNY RÉSZLETE -->
-
-    <section id="historyDetailScreen"
-             class="card hidden">
+    <section id="historyDetailScreen" class="card hidden">
 
         <div class="topbar">
 
-            <h2 id="historyDetailTitle"></h2>
+            <h2 id="historyDetailTitle">Korábbi kör</h2>
 
-            <button id="historyDetailBackButton"
-                    class="secondary">
-                Előzmények
+            <button id="historyDetailBackButton" class="secondary">
+                Vissza
             </button>
 
         </div>
 
+        <div id="historyDetailStats" class="summary"></div>
 
-        <div id="historyDetailStats"
-             class="summary">
-        </div>
-
-        <div id="historyDetailResults"
-             class="results">
-        </div>
+        <div id="historyDetailResults" class="results"></div>
 
     </section>
 
@@ -526,31 +479,27 @@
 
 
 <script>
-
 (() => {
-
     "use strict";
-
 
     const STORAGE_KEY =
         "deutsch-word-practice-history-v1";
 
-
     let catalog = [];
-
     let words = [];
-
     let currentWordIndex = 0;
-
     let currentResults = [];
-
     let currentCatalog = null;
-
     let answered = false;
 
+    // Az aktuális ismétlési körben szereplő szavak.
+    let roundQueue = [];
 
-    const $ = id =>
-        document.getElementById(id);
+    // 1 = első kör, 2 = első ismétlés, stb.
+    let roundNumber = 1;
+
+
+    const $ = id => document.getElementById(id);
 
 
     function show(screenId) {
@@ -577,11 +526,7 @@
 
         const copy = [...array];
 
-        for (
-            let i = copy.length - 1;
-            i > 0;
-            i--
-        ) {
+        for (let i = copy.length - 1; i > 0; i--) {
 
             const j =
                 Math.floor(Math.random() * (i + 1));
@@ -596,9 +541,7 @@
 
 
     function normalizeAnswer(value) {
-
         return value.trim();
-
     }
 
 
@@ -609,11 +552,9 @@
             const raw =
                 localStorage.getItem(STORAGE_KEY);
 
-            if (!raw)
-                return [];
+            if (!raw) return [];
 
-            const data =
-                JSON.parse(raw);
+            const data = JSON.parse(raw);
 
             return Array.isArray(data)
                 ? data
@@ -630,8 +571,7 @@
 
     function saveHistory() {
 
-        const history =
-            loadHistory();
+        const history = loadHistory();
 
         history.unshift({
 
@@ -656,7 +596,7 @@
 
                 correct:
                     currentResults.filter(
-                        x => x.correct
+                        x => x && x.correct
                     ).length,
 
                 total:
@@ -665,26 +605,35 @@
             },
 
             questions:
-                currentResults.map(x => ({
+                currentResults
+                    .filter(Boolean)
+                    .map(x => ({
 
-                    hu:
-                        x.hu,
+                        hu:
+                            x.hu,
 
-                    expected:
-                        x.expected,
+                        expected:
+                            x.expected,
 
-                    answer:
-                        x.answer,
+                        attempts:
+                            x.attempts || [],
 
-                    correct:
-                        x.correct
+                        // Kompatibilitás a korábbi formátummal.
+                        answer:
+                            (x.attempts &&
+                             x.attempts.length)
+                                ? x.attempts[
+                                    x.attempts.length - 1
+                                  ].answer
+                                : "",
 
-                }))
+                        correct:
+                            x.correct
+
+                    }))
 
         });
 
-
-        // Legfeljebb 200 korábbi kör.
 
         localStorage.setItem(
             STORAGE_KEY,
@@ -698,8 +647,7 @@
 
     function formatDate(iso) {
 
-        const d =
-            new Date(iso);
+        const d = new Date(iso);
 
         return d.toLocaleString(
             "hu-HU",
@@ -722,21 +670,19 @@
             const response =
                 await fetch(
                     "./catalog.json",
-                    {
-                        cache: "no-store"
-                    }
+                    { cache: "no-store" }
                 );
 
+            if (!response.ok) {
 
-            if (!response.ok)
                 throw new Error(
                     `HTTP ${response.status}`
                 );
 
+            }
 
             catalog =
                 await response.json();
-
 
             if (!Array.isArray(catalog)) {
 
@@ -746,17 +692,15 @@
 
             }
 
-
             renderCatalog();
 
         } catch (error) {
 
             $("catalogError").innerHTML =
-
                 `<div class="error">
                     Nem sikerült betölteni a catalog.json fájlt.
 
-                    ${escapeHtml(error.message)}
+${escapeHtml(error.message)}
                 </div>`;
 
         }
@@ -771,7 +715,6 @@
 
         container.innerHTML = "";
 
-
         if (catalog.length === 0) {
 
             container.innerHTML =
@@ -780,7 +723,6 @@
                 </div>`;
 
             return;
-
         }
 
 
@@ -792,25 +734,19 @@
                         "button"
                     );
 
-
                 button.className =
                     "catalog-button";
-
 
                 button.textContent =
                     item.friendlyName ||
                     `Szócsoport ${index + 1}`;
-
 
                 button.addEventListener(
                     "click",
                     () => startPractice(item)
                 );
 
-
-                container.appendChild(
-                    button
-                );
+                container.appendChild(button);
 
             }
         );
@@ -825,21 +761,19 @@
             const response =
                 await fetch(
                     item.path,
-                    {
-                        cache: "no-store"
-                    }
+                    { cache: "no-store" }
                 );
 
+            if (!response.ok) {
 
-            if (!response.ok)
                 throw new Error(
                     `HTTP ${response.status}`
                 );
 
+            }
 
             const loadedWords =
                 await response.json();
-
 
             if (!Array.isArray(loadedWords)) {
 
@@ -868,35 +802,38 @@
             }
 
 
-            currentCatalog =
-                item;
+            currentCatalog = item;
 
-            words =
-                shuffle(validWords);
+            // A teljes szókészletet egyszer megkeverjük.
+            words = shuffle(validWords);
 
-            currentWordIndex =
-                0;
+            currentWordIndex = 0;
 
-            currentResults =
-                [];
+            currentResults = [];
 
-            answered =
-                false;
+            // Az első körben minden szó szerepel.
+            roundQueue =
+                words.map(
+                    (word, index) => ({
+                        word,
+                        originalIndex: index
+                    })
+                );
+
+            roundNumber = 1;
+
+            answered = false;
 
 
             $("practiceTitle").textContent =
                 item.friendlyName;
 
-
             $("feedback").className =
                 "feedback";
 
-            $("feedback").textContent =
-                "";
+            $("feedback").textContent = "";
 
-
-            $("currentResults").innerHTML =
-                "";
+            $("currentResults").innerHTML = "";
 
 
             show("practiceScreen");
@@ -918,25 +855,24 @@ ${error.message}`
 
     function renderQuestion() {
 
+        const item =
+            roundQueue[currentWordIndex];
+
         const word =
-            words[currentWordIndex];
+            item.word;
 
-
-        answered =
-            false;
+        answered = false;
 
 
         $("counter").textContent =
-            `${currentWordIndex + 1} / ${words.length}`;
+            `${currentWordIndex + 1} / ${roundQueue.length} · ${roundNumber}. kör`;
 
 
         $("questionWord").textContent =
             word.hu;
 
 
-        $("answerInput").value =
-            "";
-
+        $("answerInput").value = "";
 
         $("answerInput").disabled =
             false;
@@ -945,18 +881,15 @@ ${error.message}`
         $("feedback").className =
             "feedback";
 
-
-        $("feedback").textContent =
-            "";
+        $("feedback").textContent = "";
 
 
         $("progressBar").style.width =
-            `${(currentWordIndex / words.length) * 100}%`;
+            `${(currentWordIndex / roundQueue.length) * 100}%`;
 
 
         setTimeout(
-            () =>
-                $("answerInput").focus(),
+            () => $("answerInput").focus(),
             0
         );
 
@@ -965,12 +898,14 @@ ${error.message}`
 
     function checkAnswer() {
 
-        if (answered)
-            return;
+        if (answered) return;
 
+
+        const item =
+            roundQueue[currentWordIndex];
 
         const word =
-            words[currentWordIndex];
+            item.word;
 
 
         const answer =
@@ -978,34 +913,71 @@ ${error.message}`
                 $("answerInput").value
             );
 
-
         const expected =
-            normalizeAnswer(word.de);
+            normalizeAnswer(
+                word.de
+            );
 
 
+        // Pontos összehasonlítás:
+        // csak a szélső szóközöket hagyjuk figyelmen kívül.
+        // A kis/nagybetű és az umlautok számítanak.
         const correct =
             answer === expected;
 
 
-        answered =
-            true;
+        answered = true;
 
 
-        currentResults.push({
+        // Az adott szó első előfordulásakor létrehozzuk
+        // a teljes eredményobjektumot.
+        if (!currentResults[item.originalIndex]) {
 
-            hu:
-                word.hu,
+            currentResults[item.originalIndex] = {
 
-            expected:
-                expected,
+                hu:
+                    word.hu,
+
+                expected:
+                    expected,
+
+                attempts:
+                    [],
+
+                correct:
+                    false
+
+            };
+
+        }
+
+
+        const result =
+            currentResults[
+                item.originalIndex
+            ];
+
+
+        // Minden próbálkozást megőrzünk.
+        result.attempts.push({
 
             answer:
                 answer,
 
             correct:
-                correct
+                correct,
+
+            round:
+                roundNumber
 
         });
+
+
+        if (correct) {
+
+            result.correct = true;
+
+        }
 
 
         const feedback =
@@ -1026,19 +998,19 @@ ${error.message}`
                 "feedback bad";
 
             feedback.innerHTML =
-
                 `✕ Nem jó.
-                 <span class="correct-answer">
+                <span class="correct-answer">
                     Helyes: ${escapeHtml(expected)}
-                 </span>
+                </span>
 
-                 <button
+                <button
                     id="wrongAnswerOk"
                     class="primary"
                     type="button"
-                    style="margin-top:12px;">
+                    style="margin-top:12px;"
+                >
                     OK
-                 </button>`;
+                </button>`;
 
         }
 
@@ -1048,7 +1020,8 @@ ${error.message}`
 
 
         $("progressBar").style.width =
-            `${((currentWordIndex + 1) / words.length) * 100}%`;
+            `${((currentWordIndex + 1) /
+                roundQueue.length) * 100}%`;
 
 
         renderCurrentResults();
@@ -1056,8 +1029,7 @@ ${error.message}`
 
         if (correct) {
 
-            // A helyes válasz 1,4 másodpercig látható.
-
+            // A helyes válasz maradjon látható.
             setTimeout(
                 advanceToNextWord,
                 1400
@@ -1065,15 +1037,14 @@ ${error.message}`
 
         } else {
 
-            // Hibás válasznál csak az OK gombbal
-            // lehet továbblépni.
-
+            // Hibánál az OK gombbal kell továbbmenni.
             $("wrongAnswerOk").focus();
 
-            $("wrongAnswerOk").addEventListener(
-                "click",
-                advanceToNextWord
-            );
+            $("wrongAnswerOk")
+                .addEventListener(
+                    "click",
+                    advanceToNextWord
+                );
 
         }
 
@@ -1082,19 +1053,61 @@ ${error.message}`
 
     function advanceToNextWord() {
 
-        if (!answered)
-            return;
+        if (!answered) return;
 
 
         currentWordIndex++;
 
 
+        // Az aktuális kör véget ért.
         if (
             currentWordIndex >=
-            words.length
+            roundQueue.length
         ) {
 
-            finishPractice();
+
+            /*
+             * Csak azok a szavak kerülnek vissza,
+             * amelyeket még SOHA nem írt helyesen.
+             *
+             * Tehát ha 50 szóból 9 hibás,
+             * akkor a következő kör 9 szavas.
+             *
+             * Ha abból 5 jó és 4 rossz,
+             * akkor a következő kör már csak 4 szavas.
+             */
+            const retryQueue =
+                roundQueue.filter(
+                    item =>
+                        !currentResults[
+                            item.originalIndex
+                        ].correct
+                );
+
+
+            // Ha nincs több hibás szó,
+            // akkor tényleg vége a gyakorlásnak.
+            if (retryQueue.length === 0) {
+
+                finishPractice();
+
+                return;
+            }
+
+
+            // Új kör: csak a hibás szavak,
+            // újra megkeverve.
+            roundQueue =
+                shuffle(retryQueue);
+
+            currentWordIndex = 0;
+
+            roundNumber++;
+
+
+            renderCurrentResults();
+
+            renderQuestion();
 
         } else {
 
@@ -1107,60 +1120,187 @@ ${error.message}`
 
     function renderCurrentResults() {
 
-        $("currentResults").innerHTML =
+        const completed =
+            currentResults.filter(Boolean);
 
-            currentResults.map(
-                item => `
-
-                <div class="result-item">
-
-                    <div class="result-icon ${item.correct ? "good" : "bad"}">
-
-                        ${item.correct ? "✓" : "✕"}
-
-                    </div>
+        const retryMode =
+            roundNumber > 1;
 
 
-                    <div>
+        $("currentResults").innerHTML = `
 
-                        <div class="result-hu">
+            <div class="round-summary">
 
-                            ${escapeHtml(item.hu)}
+                <strong>
+                    ${completed.filter(
+                        x => x.correct
+                    ).length}
+                    /
+                    ${completed.length}
+                </strong>
+
+                szó már legalább egyszer helyes
+
+            </div>
+
+
+            ${completed.map(item => {
+
+                const attempts =
+                    item.attempts || [];
+
+                const last =
+                    attempts[
+                        attempts.length - 1
+                    ];
+
+
+                /*
+                 * Az első körben még megnyithatók
+                 * a korábbi eredmények.
+                 *
+                 * Ismétlési körben viszont
+                 * minden eredmény össze van csukva
+                 * és nincs details elem,
+                 * tehát nem lehet kinyitni.
+                 */
+                if (retryMode) {
+
+                    return `
+
+                        <div
+                            class="result-item locked-result"
+                        >
+
+                            <div
+                                class="result-icon
+                                ${item.correct
+                                    ? "good"
+                                    : "bad"}"
+                            >
+                                ${item.correct
+                                    ? "✓"
+                                    : "✕"}
+                            </div>
+
+
+                            <div>
+
+                                <div class="result-hu">
+                                    ${escapeHtml(item.hu)}
+                                </div>
+
+
+                                <div class="result-detail">
+
+                                    ${item.correct
+
+                                        ? "Már helyes"
+
+                                        : `Újra kérdezzük ·
+                                           utolsó válasz:
+                                           <strong>
+                                           ${escapeHtml(
+                                               last?.answer ||
+                                               "(üres)"
+                                           )}
+                                           </strong>`
+                                    }
+
+                                </div>
+
+                            </div>
 
                         </div>
 
+                    `;
 
-                        <div class="result-detail">
+                }
 
-                            ${
-                                item.correct
 
-                                ? escapeHtml(item.answer)
+                return `
 
-                                : `
-                                    Te:
+                    <details
+                        class="result-item"
+                    >
+
+                        <summary>
+
+                            <span
+                                class="result-icon
+                                ${item.correct
+                                    ? "good"
+                                    : "bad"}"
+                            >
+                                ${item.correct
+                                    ? "✓"
+                                    : "✕"}
+                            </span>
+
+
+                            <span>
+
+                                <span class="result-hu">
+                                    ${escapeHtml(item.hu)}
+                                </span>
+
+
+                                <span class="result-detail">
+                                    ${item.correct
+                                        ? "Helyes"
+                                        : "Hibás"}
+                                </span>
+
+                            </span>
+
+                        </summary>
+
+
+                        <div
+                            class="result-attempts"
+                        >
+
+                            ${attempts.map(
+                                (attempt, index) => `
+
+                                <div>
+
+                                    ${index + 1}. kör:
+
+                                    ${attempt.correct
+                                        ? "✓"
+                                        : "✕"}
+
                                     <strong>
                                         ${escapeHtml(
-                                            item.answer || "(üres)"
+                                            attempt.answer ||
+                                            "(üres)"
                                         )}
                                     </strong>
 
-                                    · Helyes:
+                                    ${attempt.correct
+                                        ? ""
+                                        : ` · Helyes:
+                                           <strong>
+                                           ${escapeHtml(
+                                               item.expected
+                                           )}
+                                           </strong>`
+                                    }
 
-                                    <strong>
-                                        ${escapeHtml(item.expected)}
-                                    </strong>
-                                  `
-                            }
+                                </div>
+
+                            `).join("")}
 
                         </div>
 
-                    </div>
+                    </details>
 
-                </div>
+                `;
 
-            `
-            ).join("");
+            }).join("")}
+
+        `;
 
     }
 
@@ -1172,7 +1312,7 @@ ${error.message}`
 
         const correct =
             currentResults.filter(
-                x => x.correct
+                x => x && x.correct
             ).length;
 
 
@@ -1189,7 +1329,7 @@ ${error.message}`
                 </div>
 
                 <div class="summary-label">
-                    helyes válasz
+                    szó legalább egyszer helyesen
                 </div>
 
             </div>
@@ -1214,6 +1354,7 @@ ${error.message}`
 
         $("summaryResults").innerHTML =
             currentResults
+                .filter(Boolean)
                 .map(renderResultItem)
                 .join("");
 
@@ -1225,60 +1366,92 @@ ${error.message}`
 
     function renderResultItem(item) {
 
+        const attempts =
+            item.attempts || [];
+
+
         return `
 
-            <div class="result-item">
+            <details
+                class="result-item"
+            >
 
-                <div class="result-icon ${item.correct ? "good" : "bad"}">
+                <summary>
 
-                    ${item.correct ? "✓" : "✕"}
-
-                </div>
-
-
-                <div>
-
-                    <div class="result-hu">
-
-                        ${escapeHtml(item.hu)}
-
-                    </div>
-
-                </div>
+                    <span
+                        class="result-icon good"
+                    >
+                        ✓
+                    </span>
 
 
-                <div class="result-detail">
+                    <span>
 
-                    ${
-                        item.correct
+                        <span class="result-hu">
+                            ${escapeHtml(item.hu)}
+                        </span>
 
-                        ? `
-                            Válasz:
-                            <strong>
-                                ${escapeHtml(item.answer)}
-                            </strong>
-                          `
 
-                        : `
-                            Válasz:
+                        <span class="result-detail">
+
+                            ${
+                                attempts.length === 1
+
+                                    ? "Elsőre helyes"
+
+                                    : `${attempts.length}.
+                                       próbálkozásra lett helyes`
+                            }
+
+                        </span>
+
+                    </span>
+
+                </summary>
+
+
+                <div
+                    class="result-attempts"
+                >
+
+                    ${attempts.map(
+                        (attempt, index) => `
+
+                        <div>
+
+                            ${index + 1}. kör:
+
+                            ${attempt.correct
+                                ? "✓"
+                                : "✕"}
+
                             <strong>
                                 ${escapeHtml(
-                                    item.answer || "(üres)"
+                                    attempt.answer ||
+                                    "(üres)"
                                 )}
                             </strong>
 
-                            <br>
 
-                            Helyes:
-                            <strong>
-                                ${escapeHtml(item.expected)}
-                            </strong>
-                          `
-                    }
+                            ${attempt.correct
+
+                                ? ""
+
+                                : ` · Helyes:
+                                   <strong>
+                                   ${escapeHtml(
+                                       item.expected
+                                   )}
+                                   </strong>`
+                            }
+
+                        </div>
+
+                    `).join("")}
 
                 </div>
 
-            </div>
+            </details>
 
         `;
 
@@ -1289,7 +1462,6 @@ ${error.message}`
 
         const history =
             loadHistory();
-
 
         const container =
             $("historyList");
@@ -1308,13 +1480,13 @@ ${error.message}`
 
 
         container.innerHTML =
-
             history.map(
                 (item, index) => `
 
                 <button
                     class="history-item"
-                    data-history-index="${index}">
+                    data-history-index="${index}"
+                >
 
                     <div class="history-main">
 
@@ -1324,6 +1496,7 @@ ${error.message}`
                                 "Ismeretlen szócsoport"
                             )}
                         </span>
+
 
                         <span>
                             ${item.score.correct}
@@ -1335,9 +1508,7 @@ ${error.message}`
 
 
                     <div class="history-meta">
-
                         ${formatDate(item.date)}
-
                     </div>
 
                 </button>
@@ -1359,7 +1530,8 @@ ${error.message}`
                         showHistoryDetail(
                             history[
                                 Number(
-                                    button.dataset.historyIndex
+                                    button.dataset
+                                        .historyIndex
                                 )
                             ]
                         );
@@ -1374,9 +1546,10 @@ ${error.message}`
 
     function showHistoryDetail(item) {
 
-        $("historyDetailTitle").textContent =
-            item.catalogName ||
-            "Korábbi kör";
+        $("historyDetailTitle")
+            .textContent =
+                item.catalogName ||
+                "Korábbi kör";
 
 
         $("historyDetailStats").innerHTML = `
@@ -1384,11 +1557,9 @@ ${error.message}`
             <div>
 
                 <div class="summary-number">
-
                     ${item.score.correct}
                     /
                     ${item.score.total}
-
                 </div>
 
                 <div class="summary-label">
@@ -1401,13 +1572,11 @@ ${error.message}`
             <div>
 
                 <div class="summary-number">
-
                     ${Math.round(
                         item.score.correct /
                         item.score.total *
                         100
                     )}%
-
                 </div>
 
                 <div class="summary-label">
@@ -1420,11 +1589,9 @@ ${error.message}`
             <div>
 
                 <div class="summary-number">
-
                     ${escapeHtml(
                         formatDate(item.date)
                     )}
-
                 </div>
 
                 <div class="summary-label">
@@ -1436,10 +1603,11 @@ ${error.message}`
         `;
 
 
-        $("historyDetailResults").innerHTML =
-            item.questions
-                .map(renderResultItem)
-                .join("");
+        $("historyDetailResults")
+            .innerHTML =
+                item.questions
+                    .map(renderResultItem)
+                    .join("");
 
 
         show("historyDetailScreen");
@@ -1479,67 +1647,69 @@ ${error.message}`
     }
 
 
-    $("answerForm").addEventListener(
-        "submit",
-        event => {
+    $("answerForm")
+        .addEventListener(
+            "submit",
+            event => {
 
-            event.preventDefault();
+                event.preventDefault();
 
-            checkAnswer();
+                checkAnswer();
 
-        }
-    );
-
-
-    $("backButton").addEventListener(
-        "click",
-        () =>
-            show("catalogScreen")
-    );
+            }
+        );
 
 
-    $("summaryBackButton").addEventListener(
-        "click",
-        () =>
-            show("catalogScreen")
-    );
+    $("backButton")
+        .addEventListener(
+            "click",
+            () => show("catalogScreen")
+        );
 
 
-    $("historyButton").addEventListener(
-        "click",
-        () => {
-
-            renderHistory();
-
-            show("historyScreen");
-
-        }
-    );
+    $("summaryBackButton")
+        .addEventListener(
+            "click",
+            () => show("catalogScreen")
+        );
 
 
-    $("historyBackButton").addEventListener(
-        "click",
-        () =>
-            show("catalogScreen")
-    );
+    $("historyButton")
+        .addEventListener(
+            "click",
+            () => {
+
+                renderHistory();
+
+                show("historyScreen");
+
+            }
+        );
 
 
-    $("historyDetailBackButton").addEventListener(
-        "click",
-        () => {
+    $("historyBackButton")
+        .addEventListener(
+            "click",
+            () => show("catalogScreen")
+        );
 
-            renderHistory();
 
-            show("historyScreen");
+    $("historyDetailBackButton")
+        .addEventListener(
+            "click",
+            () => {
 
-        }
-    );
+                renderHistory();
+
+                show("historyScreen");
+
+            }
+        );
 
 
     loadCatalog();
 
 })();
-
 </script>
 
 </body>
