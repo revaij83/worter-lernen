@@ -57,5 +57,6 @@
   { "hu": "származások, eredetek", "de": "die Herkünfte"},
   { "hu": "lakóhely", "de": "der Wohnort"},
   { "hu": "lakóhelyek", "de": "die Wohnorte"},
-  { "hu": "életkor", "de": "das Alter"}
+  { "hu": "életkor", "de": "das Alter"},
+  { "hu": "házas", "de": "verheiratet"}
 ]
