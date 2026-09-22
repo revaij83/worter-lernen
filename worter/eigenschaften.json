@@ -48,5 +48,14 @@
   { "hu": "barátságos", "de": "freundlich" },
   { "hu": "kócos, borzas", "de": "zerzaust" },
   { "hu": "kitartó", "de": "ausdauernd" },
-  { "hu": "feltűnő", "de": "auffällig" }
+  { "hu": "feltűnő", "de": "auffällig" },
+  { "hu": "nagy", "de": "groß"},
+  { "hu": "elegáns", "de": "elegant"},
+  { "hu": "foglalkozás, szakma", "de" : "das Beruf"},
+  { "hu": "foglalkozások, szakmák", "de": "die Berufe"},
+  { "hu": "származás, eredet", "de": "die Herkunft"},
+  { "hu": "származások, eredetek", "de": "die Herkünfte"},
+  { "hu": "lakóhely", "de": "der Wohnort"},
+  { "hu": "lakóhelyek", "de": "die Wohnorte"},
+  { "hu": "életkor", "de": "das Alter"}
 ]
