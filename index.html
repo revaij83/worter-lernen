@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Német szótanuló</title>
+<style>
+    :root {
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --accent: #4f46e5;
+        --accent-hover: #4338ca;
+        --good: #16a34a;
+        --bad: #dc2626;
+        --good-bg: #f0fdf4;
+        --bad-bg: #fef2f2;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+    }
+
+    .container {
+        width: min(900px, calc(100% - 32px));
+        margin: 32px auto 60px;
+    }
+
+    h1 { margin: 0 0 8px; font-size: 30px; }
+    h2 { margin: 0 0 18px; font-size: 22px; }
+    .subtitle { color: var(--muted); margin-bottom: 28px; }
+
+    .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 18px rgba(0,0,0,.05);
+    }
+
+    .hidden { display: none !important; }
+
+    .catalog-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 12px;
+    }
+
+    button {
+        border: 0;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font: inherit;
+        cursor: pointer;
+    }
+
+    .catalog-button {
+        text-align: left;
+        background: #eef2ff;
+        color: #312e81;
+        border: 1px solid #c7d2fe;
+        transition: .15s;
+    }
+
+    .catalog-button:hover {
+        background: #e0e7ff;
+        transform: translateY(-1px);
+    }
+
+    .primary {
+        background: var(--accent);
+        color: white;
+        min-width: 120px;
+    }
+
+    .primary:hover { background: var(--accent-hover); }
+
+    .secondary {
+        background: #eef0f3;
+        color: var(--text);
+    }
+
+    .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    .progress {
+        height: 9px;
+        background: #e5e7eb;
+        border-radius: 99px;
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+
+    .progress > div {
+        height: 100%;
+        width: 0;
+        background: var(--accent);
+        transition: width .25s;
+    }
+
+    .question {
+        text-align: center;
+        padding: 24px 0 18px;
+    }
+
+    .question-label {
+        color: var(--muted);
+        font-size: 15px;
+        margin-bottom: 8px;
+    }
+
+    .word {
+        font-size: 40px;
+        font-weight: 700;
+        margin-bottom: 22px;
+    }
+
+    .answer-row {
+        display: flex;
+        max-width: 600px;
+        margin: auto;
+        gap: 10px;
+    }
+
+    input[type="text"] {
+        flex: 1;
+        min-width: 0;
+        font: inherit;
+        font-size: 20px;
+        padding: 13px 15px;
+        border: 2px solid var(--border);
+        border-radius: 10px;
+        outline: none;
+    }
+
+    input[type="text"]:focus { border-color: var(--accent); }
+
+    .feedback {
+        min-height: 72px;
+        margin-top: 20px;
+        border-radius: 12px;
+        padding: 15px 18px;
+        text-align: center;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .feedback.good {
+        color: var(--good);
+        background: var(--good-bg);
+        animation: pop .25s ease-out;
+    }
+
+    .feedback.bad {
+        color: var(--bad);
+        background: var(--bad-bg);
+        animation: shake .28s ease-in-out;
+    }
+
+    .correct-answer {
+        display: block;
+        margin-top: 5px;
+        font-weight: 700;
+    }
+
+    @keyframes pop {
+        0% { transform: scale(.96); opacity: .5; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes shake {
+        0%,100% { transform: translateX(0); }
+        25% { transform: translateX(-7px); }
+        75% { transform: translateX(7px); }
+    }
+
+    .results {
+        margin-top: 28px;
+    }
+
+    .result-item {
+        display: grid;
+        grid-template-columns: 28px 1fr 1fr;
+        gap: 10px;
+        align-items: start;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .result-item:last-child { border-bottom: 0; }
+
+    .result-icon.good { color: var(--good); font-weight: 800; }
+    .result-icon.bad { color: var(--bad); font-weight: 800; }
+
+    .result-hu { font-weight: 600; }
+    .result-detail { color: var(--muted); }
+    .result-detail strong { color: var(--text); }
+
+    .summary {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .summary-number {
+        font-size: 30px;
+        font-weight: 750;
+    }
+
+    .summary-label {
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .history-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .history-item {
+        width: 100%;
+        text-align: left;
+        background: #fafafa;
+        border: 1px solid var(--border);
+        padding: 15px;
+    }
+
+    .history-item:hover { background: #f3f4f6; }
+
+    .history-main {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        font-weight: 650;
+    }
+
+    .history-meta {
+        color: var(--muted);
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+    .empty {
+        color: var(--muted);
+        padding: 12px 0;
+    }
+
+    .error {
+        color: var(--bad);
+        background: var(--bad-bg);
+        border-radius: 10px;
+        padding: 14px;
+        white-space: pre-wrap;
+    }
+
+    @media (max-width: 600px) {
+        .container { width: min(100% - 20px, 900px); margin-top: 20px; }
+        .card { padding: 18px; }
+        .word { font-size: 32px; }
+        .answer-row { flex-direction: column; }
+        .result-item { grid-template-columns: 26px 1fr; }
+        .result-detail { grid-column: 2; }
+        .topbar { align-items: flex-start; flex-direction: column; }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>🇩🇪 Német szótanuló</h1>
+    <div class="subtitle">Magyar → német gyakorlás</div>
+
+    <section id="catalogScreen" class="card">
+        <div class="topbar">
+            <h2>Válassz egy szócsoportot</h2>
+            <button id="historyButton" class="secondary">Előzmények</button>
+        </div>
+        <div id="catalogList" class="catalog-list"></div>
+        <div id="catalogError"></div>
+    </section>
+
+    <section id="practiceScreen" class="card hidden">
+        <div class="topbar">
+            <div>
+                <h2 id="practiceTitle"></h2>
+                <div id="counter" class="subtitle" style="margin:0"></div>
+            </div>
+            <button id="backButton" class="secondary">Vissza</button>
+        </div>
+
+        <div class="progress"><div id="progressBar"></div></div>
+
+        <div id="questionArea">
+            <div class="question">
+                <div class="question-label">Fordítsd németre:</div>
+                <div id="questionWord" class="word"></div>
+
+                <form id="answerForm" class="answer-row">
+                    <input id="answerInput" type="text" autocomplete="off" spellcheck="false" autofocus>
+                    <button class="primary" type="submit">Ellenőrzés</button>
+                </form>
+
+                <div id="feedback" class="feedback"></div>
+            </div>
+        </div>
+
+        <div id="currentResults" class="results"></div>
+    </section>
+
+    <section id="summaryScreen" class="card hidden">
+        <div class="topbar">
+            <h2>Kör vége</h2>
+            <button id="summaryBackButton" class="secondary">Szócsoportok</button>
+        </div>
+
+        <div id="summaryStats" class="summary"></div>
+        <div id="summaryResults" class="results"></div>
+    </section>
+
+    <section id="historyScreen" class="card hidden">
+        <div class="topbar">
+            <h2>Előzmények</h2>
+            <button id="historyBackButton" class="secondary">Szócsoportok</button>
+        </div>
+        <div id="historyList" class="history-list"></div>
+    </section>
+
+    <section id="historyDetailScreen" class="card hidden">
+        <div class="topbar">
+            <h2 id="historyDetailTitle"></h2>
+            <button id="historyDetailBackButton" class="secondary">Előzmények</button>
+        </div>
+        <div id="historyDetailStats" class="summary"></div>
+        <div id="historyDetailResults" class="results"></div>
+    </section>
+</div>
+
+<script>
+(() => {
+    "use strict";
+
+    const STORAGE_KEY = "deutsch-word-practice-history-v1";
+
+    let catalog = [];
+    let words = [];
+    let currentWordIndex = 0;
+    let currentResults = [];
+    let currentCatalog = null;
+    let answered = false;
+
+    const $ = id => document.getElementById(id);
+
+    function show(screenId) {
+        ["catalogScreen", "practiceScreen", "summaryScreen",
+         "historyScreen", "historyDetailScreen"].forEach(id => {
+            $(id).classList.toggle("hidden", id !== screenId);
+        });
+    }
+
+    function shuffle(array) {
+        const copy = [...array];
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+
+    function normalizeAnswer(value) {
+        return value.trim();
+    }
+
+    function loadHistory() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return [];
+            const data = JSON.parse(raw);
+            return Array.isArray(data) ? data : [];
+        } catch {
+            return [];
+        }
+    }
+
+    function saveHistory() {
+        const history = loadHistory();
+        history.unshift({
+            id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+            date: new Date().toISOString(),
+            catalogId: currentCatalog.id || null,
+            catalogName: currentCatalog.friendlyName,
+            catalogPath: currentCatalog.path,
+            score: {
+                correct: currentResults.filter(x => x.correct).length,
+                total: currentResults.length
+            },
+            questions: currentResults.map(x => ({
+                hu: x.hu,
+                expected: x.expected,
+                answer: x.answer,
+                correct: x.correct
+            }))
+        });
+
+        // Keep a reasonable amount of history.
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(0, 200)));
+    }
+
+    function formatDate(iso) {
+        const d = new Date(iso);
+        return d.toLocaleString("hu-HU", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+    async function loadCatalog() {
+        try {
+            const response = await fetch("./catalog.json", { cache: "no-store" });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            catalog = await response.json();
+
+            if (!Array.isArray(catalog)) {
+                throw new Error("A catalog.json nem tömböt tartalmaz.");
+            }
+
+            renderCatalog();
+        } catch (error) {
+            $("catalogError").innerHTML =
+                `<div class="error">Nem sikerült betölteni a catalog.json fájlt.\n\n${escapeHtml(error.message)}</div>`;
+        }
+    }
+
+    function renderCatalog() {
+        const container = $("catalogList");
+        container.innerHTML = "";
+
+        if (catalog.length === 0) {
+            container.innerHTML = `<div class="empty">Nincs szócsoport a katalógusban.</div>`;
+            return;
+        }
+
+        catalog.forEach((item, index) => {
+            const button = document.createElement("button");
+            button.className = "catalog-button";
+            button.textContent = item.friendlyName || `Szócsoport ${index + 1}`;
+            button.addEventListener("click", () => startPractice(item));
+            container.appendChild(button);
+        });
+    }
+
+    async function startPractice(item) {
+        try {
+            const response = await fetch(item.path, { cache: "no-store" });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const loadedWords = await response.json();
+
+            if (!Array.isArray(loadedWords)) {
+                throw new Error("A szócsoport JSON fájlja nem tömböt tartalmaz.");
+            }
+
+            const validWords = loadedWords.filter(
+                x => x && typeof x.hu === "string" && typeof x.de === "string"
+            );
+
+            if (validWords.length === 0) {
+                throw new Error("A szócsoportban nincs érvényes szó.");
+            }
+
+            currentCatalog = item;
+            words = shuffle(validWords);
+            currentWordIndex = 0;
+            currentResults = [];
+            answered = false;
+
+            $("practiceTitle").textContent = item.friendlyName;
+            $("feedback").className = "feedback";
+            $("feedback").textContent = "";
+            $("currentResults").innerHTML = "";
+
+            show("practiceScreen");
+            renderQuestion();
+        } catch (error) {
+            alert(`Nem sikerült betölteni a szócsoportot:\n\n${error.message}`);
+        }
+    }
+
+    function renderQuestion() {
+        const word = words[currentWordIndex];
+        answered = false;
+
+        $("counter").textContent = `${currentWordIndex + 1} / ${words.length}`;
+        $("questionWord").textContent = word.hu;
+        $("answerInput").value = "";
+        $("answerInput").disabled = false;
+        $("feedback").className = "feedback";
+        $("feedback").textContent = "";
+        $("progressBar").style.width =
+            `${(currentWordIndex / words.length) * 100}%`;
+
+        setTimeout(() => $("answerInput").focus(), 0);
+    }
+
+    function checkAnswer() {
+        if (answered) return;
+
+        const word = words[currentWordIndex];
+        const answer = normalizeAnswer($("answerInput").value);
+        const expected = normalizeAnswer(word.de);
+        const correct = answer === expected;
+
+        answered = true;
+
+        currentResults.push({
+            hu: word.hu,
+            expected,
+            answer,
+            correct
+        });
+
+        const feedback = $("feedback");
+
+        if (correct) {
+            feedback.className = "feedback good";
+            feedback.innerHTML = "✓ Helyes!";
+        } else {
+            feedback.className = "feedback bad";
+            feedback.innerHTML =
+                `✕ Nem jó.<span class="correct-answer">Helyes: ${escapeHtml(expected)}</span>`;
+        }
+
+        $("answerInput").disabled = true;
+        $("progressBar").style.width =
+            `${((currentWordIndex + 1) / words.length) * 100}%`;
+
+        renderCurrentResults();
+
+        setTimeout(() => {
+            currentWordIndex++;
+
+            if (currentWordIndex >= words.length) {
+                finishPractice();
+            } else {
+                renderQuestion();
+            }
+        }, correct ? 650 : 1600);
+    }
+
+    function renderCurrentResults() {
+        $("currentResults").innerHTML = currentResults.map(item => `
+            <div class="result-item">
+                <div class="result-icon ${item.correct ? "good" : "bad"}">
+                    ${item.correct ? "✓" : "✕"}
+                </div>
+                <div>
+                    <div class="result-hu">${escapeHtml(item.hu)}</div>
+                    <div class="result-detail">
+                        ${item.correct
+                            ? escapeHtml(item.answer)
+                            : `Te: <strong>${escapeHtml(item.answer || "(üres)")}</strong>
+                               · Helyes: <strong>${escapeHtml(item.expected)}</strong>`}
+                    </div>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    function finishPractice() {
+        saveHistory();
+
+        const correct = currentResults.filter(x => x.correct).length;
+        const total = currentResults.length;
+
+        $("summaryStats").innerHTML = `
+            <div>
+                <div class="summary-number">${correct} / ${total}</div>
+                <div class="summary-label">helyes válasz</div>
+            </div>
+            <div>
+                <div class="summary-number">${Math.round(correct / total * 100)}%</div>
+                <div class="summary-label">eredmény</div>
+            </div>
+        `;
+
+        $("summaryResults").innerHTML = currentResults.map(renderResultItem).join("");
+        show("summaryScreen");
+    }
+
+    function renderResultItem(item) {
+        return `
+            <div class="result-item">
+                <div class="result-icon ${item.correct ? "good" : "bad"}">
+                    ${item.correct ? "✓" : "✕"}
+                </div>
+                <div>
+                    <div class="result-hu">${escapeHtml(item.hu)}</div>
+                </div>
+                <div class="result-detail">
+                    ${item.correct
+                        ? `Válasz: <strong>${escapeHtml(item.answer)}</strong>`
+                        : `Válasz: <strong>${escapeHtml(item.answer || "(üres)")}</strong><br>
+                           Helyes: <strong>${escapeHtml(item.expected)}</strong>`}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderHistory() {
+        const history = loadHistory();
+        const container = $("historyList");
+
+        if (history.length === 0) {
+            container.innerHTML = `<div class="empty">Még nincs korábbi kör.</div>`;
+            return;
+        }
+
+        container.innerHTML = history.map((item, index) => `
+            <button class="history-item" data-history-index="${index}">
+                <div class="history-main">
+                    <span>${escapeHtml(item.catalogName || "Ismeretlen szócsoport")}</span>
+                    <span>${item.score.correct} / ${item.score.total}</span>
+                </div>
+                <div class="history-meta">${formatDate(item.date)}</div>
+            </button>
+        `).join("");
+
+        container.querySelectorAll("[data-history-index]").forEach(button => {
+            button.addEventListener("click", () => {
+                showHistoryDetail(history[Number(button.dataset.historyIndex)]);
+            });
+        });
+    }
+
+    function showHistoryDetail(item) {
+        $("historyDetailTitle").textContent = item.catalogName || "Korábbi kör";
+        $("historyDetailStats").innerHTML = `
+            <div>
+                <div class="summary-number">${item.score.correct} / ${item.score.total}</div>
+                <div class="summary-label">helyes válasz</div>
+            </div>
+            <div>
+                <div class="summary-number">${Math.round(item.score.correct / item.score.total * 100)}%</div>
+                <div class="summary-label">eredmény</div>
+            </div>
+            <div>
+                <div class="summary-number">${escapeHtml(formatDate(item.date))}</div>
+                <div class="summary-label">dátum</div>
+            </div>
+        `;
+
+        $("historyDetailResults").innerHTML =
+            item.questions.map(renderResultItem).join("");
+
+        show("historyDetailScreen");
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    $("answerForm").addEventListener("submit", event => {
+        event.preventDefault();
+        checkAnswer();
+    });
+
+    $("backButton").addEventListener("click", () => show("catalogScreen"));
+    $("summaryBackButton").addEventListener("click", () => show("catalogScreen"));
+    $("historyButton").addEventListener("click", () => {
+        renderHistory();
+        show("historyScreen");
+    });
+    $("historyBackButton").addEventListener("click", () => show("catalogScreen"));
+    $("historyDetailBackButton").addEventListener("click", () => {
+        renderHistory();
+        show("historyScreen");
+    });
+
+    loadCatalog();
+})();
+</script>
+</body>
+</html>
