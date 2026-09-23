@@ -2,6 +2,13 @@
   {
     "id": "eigenschaften",
     "friendlyName": "Eigenschaften",
-    "path": "./worter/eigenschaften.json"
+    "path": "./worter/eigenschaften.json",
+    "type": "words"
+  },
+  {
+    "id": "starke-verben",
+    "friendlyName": "Starke Verben",
+    "path": "./worter/starke-verben.json",
+    "type": "verbs"
   }
 ]
