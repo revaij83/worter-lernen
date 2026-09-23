@@ -1,0 +1,122 @@
+[
+  {
+    "infinitiv": "anfangen",
+    "hu": "elkezdeni",
+    "praeteritum": "fing an",
+    "perfekt": "hat angefangen"
+  },
+  {
+    "infinitiv": "bleiben",
+    "hu": "maradni",
+    "praeteritum": "blieb",
+    "perfekt": "ist geblieben"
+  },
+  {
+    "infinitiv": "essen",
+    "hu": "enni",
+    "praeteritum": "aß",
+    "perfekt": "hat gegessen"
+  },
+  {
+    "infinitiv": "fahren",
+    "hu": "utazni, vezetni",
+    "praeteritum": "fuhr",
+    "perfekt": "ist gefahren"
+  },
+  {
+    "infinitiv": "finden",
+    "hu": "megtalálni",
+    "praeteritum": "fand",
+    "perfekt": "hat gefunden"
+  },
+  {
+    "infinitiv": "geben",
+    "hu": "adni",
+    "praeteritum": "gab",
+    "perfekt": "hat gegeben"
+  },
+  {
+    "infinitiv": "gehen",
+    "hu": "menni",
+    "praeteritum": "ging",
+    "perfekt": "ist gegangen"
+  },
+  {
+    "infinitiv": "lesen",
+    "hu": "olvasni",
+    "praeteritum": "las",
+    "perfekt": "hat gelesen"
+  },
+  {
+    "infinitiv": "nehmen",
+    "hu": "venni",
+    "praeteritum": "nahm",
+    "perfekt": "hat genommen"
+  },
+  {
+    "infinitiv": "schreiben",
+    "hu": "írni",
+    "praeteritum": "schrieb",
+    "perfekt": "hat geschrieben"
+  },
+  {
+    "infinitiv": "sehen",
+    "hu": "látni",
+    "praeteritum": "sah",
+    "perfekt": "hat gesehen"
+  },
+  {
+    "infinitiv": "sprechen",
+    "hu": "beszélni",
+    "praeteritum": "sprach",
+    "perfekt": "hat gesprochen"
+  },
+  {
+    "infinitiv": "tragen",
+    "hu": "vinni, hordani",
+    "praeteritum": "trug",
+    "perfekt": "hat getragen"
+  },
+  {
+    "infinitiv": "trinken",
+    "hu": "inni",
+    "praeteritum": "trank",
+    "perfekt": "hat getrunken"
+  },
+  {
+    "infinitiv": "treffen",
+    "hu": "találkozni, találni",
+    "praeteritum": "traf",
+    "perfekt": "hat getroffen"
+  },
+  {
+    "infinitiv": "vergessen",
+    "hu": "elfelejteni",
+    "praeteritum": "vergaß",
+    "perfekt": "hat vergessen"
+  },
+  {
+    "infinitiv": "verlieren",
+    "hu": "elveszíteni",
+    "praeteritum": "verlor",
+    "perfekt": "hat verloren"
+  },
+  {
+    "infinitiv": "werden",
+    "hu": "válni, lesz",
+    "praeteritum": "wurde",
+    "perfekt": "ist geworden"
+  },
+  {
+    "infinitiv": "werfen",
+    "hu": "dobni",
+    "praeteritum": "warf",
+    "perfekt": "hat geworfen"
+  },
+  {
+    "infinitiv": "wissen",
+    "hu": "tudni",
+    "praeteritum": "wusste",
+    "perfekt": "hat gewusst"
+  }
+]
