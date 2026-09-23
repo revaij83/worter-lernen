@@ -86,7 +86,7 @@
     .word-list-header { font-size:14px; color:var(--muted); font-weight:650; border-bottom:2px solid var(--border); }
     .verb-list-row {
         display:grid;
-        grid-template-columns: 1.2fr 1fr 1fr 1.2fr;
+        grid-template-columns: minmax(230px, 1.2fr) minmax(120px, 1fr) minmax(130px, 1fr) minmax(150px, 1.2fr);
         column-gap:18px;
         align-items:baseline;
         padding:7px 0;
@@ -350,7 +350,7 @@
 
     @media (max-width: 600px) {
         .word-list-row { grid-template-columns:220px 28px minmax(180px,1fr); }
-        .verb-list-row { grid-template-columns: 1.2fr 1fr 1fr 1.2fr; column-gap:10px; font-size:15px; }
+        .verb-list-row { grid-template-columns: minmax(230px, 1.2fr) minmax(120px, 1fr) minmax(130px, 1fr) minmax(150px, 1.2fr); column-gap:10px; font-size:15px; }
         .container { width: min(100% - 20px, 900px); margin-top: 20px; }
         .card { padding: 18px; }
         .word { font-size: 32px; }
