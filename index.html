@@ -86,7 +86,7 @@
     .word-list-header { font-size:14px; color:var(--muted); font-weight:650; border-bottom:2px solid var(--border); }
     .verb-list-row {
         display:grid;
-        grid-template-columns: 1.4fr 1fr 1.2fr;
+        grid-template-columns: 1.2fr 1fr 1fr 1.2fr;
         column-gap:18px;
         align-items:baseline;
         padding:7px 0;
@@ -94,6 +94,7 @@
         font-size:17px;
     }
     .verb-list-row .german { font-weight:600; }
+    .verb-list-header { font-size:14px; color:var(--muted); font-weight:650; border-bottom:2px solid var(--border); }
     .verb-hu { color:var(--muted); font-size:14px; font-weight:400; }
     .verb-question .word { margin-bottom:18px; }
     .verb-answers {
@@ -349,7 +350,7 @@
 
     @media (max-width: 600px) {
         .word-list-row { grid-template-columns:220px 28px minmax(180px,1fr); }
-        .verb-list-row { grid-template-columns: 1.2fr 1fr 1.2fr; column-gap:10px; font-size:15px; }
+        .verb-list-row { grid-template-columns: 1.2fr 1fr 1fr 1.2fr; column-gap:10px; font-size:15px; }
         .container { width: min(100% - 20px, 900px); margin-top: 20px; }
         .card { padding: 18px; }
         .word { font-size: 32px; }
@@ -441,6 +442,10 @@
             <div id="verbQuestionWord" class="word"></div>
 
             <form id="verbAnswerForm" class="verb-answers">
+                <div class="verb-answer-row">
+                    <label for="verbPraesensInput">Präsens (E/3):</label>
+                    <input id="verbPraesensInput" type="text" autocomplete="off" spellcheck="false">
+                </div>
                 <div class="verb-answer-row">
                     <label for="verbPraeteritumInput">Präteritum:</label>
                     <input id="verbPraeteritumInput" type="text" autocomplete="off" spellcheck="false">
@@ -546,8 +551,10 @@
         if (isVerbGroup) {
             score = {
                 correct: allAttempts.reduce((sum, attempt) =>
-                    sum + (attempt.praeteritumCorrect ? 1 : 0) + (attempt.perfektCorrect ? 1 : 0), 0),
-                total: allAttempts.length * 2
+                    sum + (attempt.praesensCorrect ? 1 : 0) +
+                    (attempt.praeteritumCorrect ? 1 : 0) +
+                    (attempt.perfektCorrect ? 1 : 0), 0),
+                total: allAttempts.length * 3
             };
         } else {
             score = {
@@ -567,6 +574,7 @@
             questions: currentResults.filter(Boolean).map(x => ({
                 hu: x.hu,
                 infinitiv: x.infinitiv || null,
+                praesens: x.praesens || null,
                 expected: x.expected || null,
                 praeteritum: x.praeteritum || null,
                 perfekt: x.perfekt || null,
@@ -644,6 +652,7 @@
                 x &&
                 typeof x.infinitiv === "string" &&
                 typeof x.hu === "string" &&
+                typeof x.praesens === "string" &&
                 typeof x.praeteritum === "string" &&
                 typeof x.perfekt === "string"
             );
@@ -685,10 +694,11 @@
                 `;
             } else {
                 $("wordList").innerHTML = `
-                    <div class="word-list-row word-list-header"><div>Infinitiv</div><div>Präteritum</div><div>Perfekt</div></div>
+                    <div class="verb-list-row verb-list-header"><div>Infinitiv</div><div>Präsens</div><div>Präteritum</div><div>Perfekt</div></div>
                     ${sortedItems.map(word => `
                         <div class="verb-list-row">
                             <div class="german">${escapeHtml(word.infinitiv)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div>
+                            <div>${escapeHtml(word.praesens)}</div>
                             <div>${escapeHtml(word.praeteritum)}</div>
                             <div>${escapeHtml(word.perfekt)}</div>
                         </div>
@@ -755,14 +765,16 @@ ${error.message}`);
 
         $("verbCounter").textContent = `${currentWordIndex + 1} / ${roundQueue.length} · ${roundNumber}. kör`;
         $("verbQuestionWord").textContent = `${word.infinitiv} (${word.hu})`;
+        $("verbPraesensInput").value = "";
         $("verbPraeteritumInput").value = "";
         $("verbPerfektInput").value = "";
+        $("verbPraesensInput").disabled = false;
         $("verbPraeteritumInput").disabled = false;
         $("verbPerfektInput").disabled = false;
         $("verbFeedback").className = "feedback";
         $("verbFeedback").textContent = "";
         $("verbProgressBar").style.width = `${(currentWordIndex / roundQueue.length) * 100}%`;
-        setTimeout(() => $("verbPraeteritumInput").focus(), 0);
+        setTimeout(() => $("verbPraesensInput").focus(), 0);
     }
 
     function checkVerbAnswer() {
@@ -770,13 +782,16 @@ ${error.message}`);
 
         const item = roundQueue[currentWordIndex];
         const word = item.word;
+        const praesensAnswer = normalizeAnswer($("verbPraesensInput").value);
         const praeteritumAnswer = normalizeAnswer($("verbPraeteritumInput").value);
         const perfektAnswer = normalizeAnswer($("verbPerfektInput").value);
+        const expectedPraesens = normalizeAnswer(word.praesens);
         const expectedPraeteritum = normalizeAnswer(word.praeteritum);
         const expectedPerfekt = normalizeAnswer(word.perfekt);
+        const praesensCorrect = praesensAnswer === expectedPraesens;
         const praeteritumCorrect = praeteritumAnswer === expectedPraeteritum;
         const perfektCorrect = perfektAnswer === expectedPerfekt;
-        const correct = praeteritumCorrect && perfektCorrect;
+        const correct = praesensCorrect && praeteritumCorrect && perfektCorrect;
 
         answered = true;
 
@@ -784,6 +799,7 @@ ${error.message}`);
             currentResults[item.originalIndex] = {
                 hu: word.hu,
                 infinitiv: word.infinitiv,
+                praesens: expectedPraesens,
                 praeteritum: expectedPraeteritum,
                 perfekt: expectedPerfekt,
                 attempts: [],
@@ -793,8 +809,10 @@ ${error.message}`);
 
         const result = currentResults[item.originalIndex];
         result.attempts.push({
+            praesens: praesensAnswer,
             praeteritum: praeteritumAnswer,
             perfekt: perfektAnswer,
+            praesensCorrect,
             praeteritumCorrect,
             perfektCorrect,
             correct,
@@ -806,12 +824,13 @@ ${error.message}`);
         const feedback = $("verbFeedback");
         if (correct) {
             feedback.className = "feedback good";
-            feedback.innerHTML = "✓ Mindkét alak helyes!";
+            feedback.innerHTML = "✓ Mindhárom alak helyes!";
         } else {
             feedback.className = "feedback bad";
             feedback.innerHTML = `
                 <div>✕ Nem jó, ezt az igét újra kérdezzük.</div>
                 <div class="verb-feedback-lines">
+                    <div class="verb-feedback-line">Präsens: ${praesensCorrect ? "✓ helyes" : `✕ helyes: <strong>${escapeHtml(expectedPraesens)}</strong>`}</div>
                     <div class="verb-feedback-line">Präteritum: ${praeteritumCorrect ? "✓ helyes" : `✕ helyes: <strong>${escapeHtml(expectedPraeteritum)}</strong>`}</div>
                     <div class="verb-feedback-line">Perfekt: ${perfektCorrect ? "✓ helyes" : `✕ helyes: <strong>${escapeHtml(expectedPerfekt)}</strong>`}</div>
                 </div>
@@ -819,6 +838,7 @@ ${error.message}`);
             `;
         }
 
+        $("verbPraesensInput").disabled = true;
         $("verbPraeteritumInput").disabled = true;
         $("verbPerfektInput").disabled = true;
         $("verbProgressBar").style.width = `${((currentWordIndex + 1) / roundQueue.length) * 100}%`;
@@ -862,7 +882,7 @@ ${error.message}`);
         $("verbCurrentResults").innerHTML = `
             <div class="round-summary">
                 <strong>${completed.filter(x => x.correct).length} / ${completed.length}</strong>
-                ige már mindkét alakban helyes
+                ige már mindhárom alakban helyes
             </div>
             ${completed.map(item => {
                 const attempts = item.attempts || [];
@@ -875,7 +895,7 @@ ${error.message}`);
                             <div>
                                 <div class="result-hu">${escapeHtml(item.infinitiv)} (${escapeHtml(item.hu)})</div>
                                 <div class="result-detail">
-                                    ${item.correct ? "Mindkét alak helyes" : `Újra kérdezzük · utolsó kör: Präteritum ${last?.praeteritumCorrect ? "✓" : "✕"}, Perfekt ${last?.perfektCorrect ? "✓" : "✕"}`}
+                                    ${item.correct ? "Mindhárom alak helyes" : `Újra kérdezzük · utolsó kör: Präsens ${last?.praesensCorrect ? "✓" : "✕"}, Präteritum ${last?.praeteritumCorrect ? "✓" : "✕"}, Perfekt ${last?.perfektCorrect ? "✓" : "✕"}`}
                                 </div>
                             </div>
                         </div>
@@ -888,14 +908,14 @@ ${error.message}`);
                             <span class="result-icon ${item.correct ? "good" : "bad"}">${item.correct ? "✓" : "✕"}</span>
                             <span>
                                 <span class="result-hu">${escapeHtml(item.infinitiv)} (${escapeHtml(item.hu)})</span>
-                                <span class="result-detail">${item.correct ? "Mindkét alak helyes" : "Hibás"}</span>
+                                <span class="result-detail">${item.correct ? "Mindhárom alak helyes" : "Hibás"}</span>
                             </span>
                         </summary>
                         <div class="result-attempts">
                             ${attempts.map((attempt, index) => `
                                 <div>
-                                    ${index + 1}. kör: Präteritum ${attempt.praeteritumCorrect ? "✓" : "✕"} <strong>${escapeHtml(attempt.praeteritum || "(üres)")}</strong> · Perfekt ${attempt.perfektCorrect ? "✓" : "✕"} <strong>${escapeHtml(attempt.perfekt || "(üres)")}</strong>
-                                    ${attempt.praeteritumCorrect && attempt.perfektCorrect ? "" : `<br>Helyes: <strong>${escapeHtml(item.praeteritum)}</strong> · <strong>${escapeHtml(item.perfekt)}</strong>`}
+                                    ${index + 1}. kör: Präsens ${attempt.praesensCorrect ? "✓" : "✕"} <strong>${escapeHtml(attempt.praesens || "(üres)")}</strong> · Präteritum ${attempt.praeteritumCorrect ? "✓" : "✕"} <strong>${escapeHtml(attempt.praeteritum || "(üres)")}</strong> · Perfekt ${attempt.perfektCorrect ? "✓" : "✕"} <strong>${escapeHtml(attempt.perfekt || "(üres)")}</strong>
+                                    ${attempt.praesensCorrect && attempt.praeteritumCorrect && attempt.perfektCorrect ? "" : `<br>Helyes: <strong>${escapeHtml(item.praesens)}</strong> · <strong>${escapeHtml(item.praeteritum)}</strong> · <strong>${escapeHtml(item.perfekt)}</strong>`}
                                 </div>
                             `).join("")}
                         </div>
@@ -1078,10 +1098,12 @@ ${error.message}`);
             .flatMap(item => item.attempts || []);
 
         const isVerbGroup = currentCatalog.type === "verbs";
-        const totalAnswers = isVerbGroup ? allAttempts.length * 2 : allAttempts.length;
+        const totalAnswers = isVerbGroup ? allAttempts.length * 3 : allAttempts.length;
         const correctAnswers = isVerbGroup
             ? allAttempts.reduce((sum, attempt) =>
-                sum + (attempt.praeteritumCorrect ? 1 : 0) + (attempt.perfektCorrect ? 1 : 0), 0)
+                sum + (attempt.praesensCorrect ? 1 : 0) +
+                (attempt.praeteritumCorrect ? 1 : 0) +
+                (attempt.perfektCorrect ? 1 : 0), 0)
             : allAttempts.filter(attempt => attempt.correct).length;
         const totalWords = currentResults.filter(Boolean).length;
 
@@ -1110,7 +1132,7 @@ ${error.message}`);
 
     function renderResultItem(item) {
         const attempts = item.attempts || [];
-        const isVerb = Boolean(item.infinitiv && (item.praeteritum || item.perfekt));
+        const isVerb = Boolean(item.infinitiv && (item.praesens || item.praeteritum || item.perfekt));
 
         if (isVerb) {
             return `
@@ -1120,7 +1142,7 @@ ${error.message}`);
                         <span>
                             <span class="result-hu">${escapeHtml(item.infinitiv)} (${escapeHtml(item.hu)})</span>
                             <span class="result-detail">
-                                ${attempts.length === 1 ? "Elsőre mindkettő helyes" : `${attempts.length}. próbálkozásra lett helyes`}
+                                ${attempts.length === 1 ? "Elsőre mindhárom helyes" : `${attempts.length}. próbálkozásra lett helyes`}
                             </span>
                         </span>
                     </summary>
@@ -1128,9 +1150,10 @@ ${error.message}`);
                         ${attempts.map((attempt, index) => `
                             <div>
                                 ${index + 1}. kör:
+                                Präsens ${attempt.praesensCorrect ? "✓" : "✕"} <strong>${escapeHtml(attempt.praesens || "(üres)")}</strong> ·
                                 Präteritum ${attempt.praeteritumCorrect ? "✓" : "✕"} <strong>${escapeHtml(attempt.praeteritum || "(üres)")}</strong> ·
                                 Perfekt ${attempt.perfektCorrect ? "✓" : "✕"} <strong>${escapeHtml(attempt.perfekt || "(üres)")}</strong>
-                                ${attempt.praeteritumCorrect && attempt.perfektCorrect ? "" : `<br>Helyes: <strong>${escapeHtml(item.praeteritum)}</strong> · <strong>${escapeHtml(item.perfekt)}</strong>`}
+                                ${attempt.praesensCorrect && attempt.praeteritumCorrect && attempt.perfektCorrect ? "" : `<br>Helyes: <strong>${escapeHtml(item.praesens)}</strong> · <strong>${escapeHtml(item.praeteritum)}</strong> · <strong>${escapeHtml(item.perfekt)}</strong>`}
                             </div>
                         `).join("")}
                     </div>
