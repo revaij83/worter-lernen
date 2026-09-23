@@ -84,6 +84,44 @@
     .word-list-row .german { font-weight:600; }
     .word-list-row .dash { text-align:center; color:var(--muted); }
     .word-list-header { font-size:14px; color:var(--muted); font-weight:650; border-bottom:2px solid var(--border); }
+    .verb-list-row {
+        display:grid;
+        grid-template-columns: 1.4fr 1fr 1.2fr;
+        column-gap:18px;
+        align-items:baseline;
+        padding:7px 0;
+        border-bottom:1px solid var(--border);
+        font-size:17px;
+    }
+    .verb-list-row .german { font-weight:600; }
+    .verb-hu { color:var(--muted); font-size:14px; font-weight:400; }
+    .verb-question .word { margin-bottom:18px; }
+    .verb-answers {
+        width: min(600px, 100%);
+        margin: 0 auto;
+        display: grid;
+        gap: 12px;
+    }
+    .verb-answer-row {
+        display: grid;
+        grid-template-columns: 130px minmax(0, 1fr);
+        align-items: center;
+        gap: 10px;
+        text-align: left;
+    }
+    .verb-answer-row label {
+        font-weight: 650;
+    }
+    .verb-answer-row input {
+        width: 100%;
+    }
+    .verb-feedback-lines {
+        display: grid;
+        gap: 4px;
+    }
+    .verb-feedback-line {
+        font-weight: 600;
+    }
 
     .primary {
         background: var(--accent);
@@ -311,6 +349,7 @@
 
     @media (max-width: 600px) {
         .word-list-row { grid-template-columns:220px 28px minmax(180px,1fr); }
+        .verb-list-row { grid-template-columns: 1.2fr 1fr 1.2fr; column-gap:10px; font-size:15px; }
         .container { width: min(100% - 20px, 900px); margin-top: 20px; }
         .card { padding: 18px; }
         .word { font-size: 32px; }
@@ -386,6 +425,38 @@
         <div id="currentResults" class="results"></div>
     </section>
 
+    <section id="verbPracticeScreen" class="card hidden">
+        <div class="topbar">
+            <div>
+                <h2 id="verbPracticeTitle"></h2>
+                <div id="verbCounter" class="subtitle" style="margin:0"></div>
+            </div>
+            <button id="verbBackButton" class="secondary">Vissza</button>
+        </div>
+
+        <div class="progress"><div id="verbProgressBar"></div></div>
+
+        <div class="question verb-question">
+            <div class="question-label">Írd le a megadott ige két alakját:</div>
+            <div id="verbQuestionWord" class="word"></div>
+
+            <form id="verbAnswerForm" class="verb-answers">
+                <div class="verb-answer-row">
+                    <label for="verbPraeteritumInput">Präteritum:</label>
+                    <input id="verbPraeteritumInput" type="text" autocomplete="off" spellcheck="false">
+                </div>
+                <div class="verb-answer-row">
+                    <label for="verbPerfektInput">Perfekt:</label>
+                    <input id="verbPerfektInput" type="text" autocomplete="off" spellcheck="false">
+                </div>
+                <button class="primary" type="submit">Ellenőrzés</button>
+                <div id="verbFeedback" class="feedback"></div>
+            </form>
+        </div>
+
+        <div id="verbCurrentResults" class="results"></div>
+    </section>
+
     <section id="summaryScreen" class="card hidden">
         <div class="topbar">
             <h2>Kör vége</h2>
@@ -433,8 +504,8 @@
 
     function show(screenId) {
         ["catalogScreen", "groupChoiceScreen", "wordListScreen",
-         "practiceScreen", "summaryScreen", "historyScreen",
-         "historyDetailScreen"].forEach(id => {
+         "practiceScreen", "verbPracticeScreen", "summaryScreen",
+         "historyScreen", "historyDetailScreen"].forEach(id => {
             $(id).classList.toggle("hidden", id !== screenId);
         });
     }
@@ -465,30 +536,42 @@
 
     function saveHistory() {
         const history = loadHistory();
+        const isVerbGroup = currentCatalog.type === "verbs";
+
+        const allAttempts = currentResults
+            .filter(Boolean)
+            .flatMap(x => x.attempts || []);
+
+        let score;
+        if (isVerbGroup) {
+            score = {
+                correct: allAttempts.reduce((sum, attempt) =>
+                    sum + (attempt.praeteritumCorrect ? 1 : 0) + (attempt.perfektCorrect ? 1 : 0), 0),
+                total: allAttempts.length * 2
+            };
+        } else {
+            score = {
+                correct: allAttempts.filter(attempt => attempt.correct).length,
+                total: allAttempts.length
+            };
+        }
+
         history.unshift({
             id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
             date: new Date().toISOString(),
             catalogId: currentCatalog.id || null,
             catalogName: currentCatalog.friendlyName,
             catalogPath: currentCatalog.path,
-            score: (() => {
-                const allAttempts = currentResults
-                    .filter(Boolean)
-                    .flatMap(x => x.attempts || []);
-
-                return {
-                    correct: allAttempts.filter(attempt => attempt.correct).length,
-                    total: allAttempts.length
-                };
-            })(),
+            type: currentCatalog.type || "words",
+            score,
             questions: currentResults.filter(Boolean).map(x => ({
                 hu: x.hu,
-                expected: x.expected,
+                infinitiv: x.infinitiv || null,
+                expected: x.expected || null,
+                praeteritum: x.praeteritum || null,
+                perfekt: x.perfekt || null,
                 attempts: x.attempts || [],
-                // Compatibility with the earlier history format.
-                answer: (x.attempts && x.attempts.length)
-                    ? x.attempts[x.attempts.length - 1].answer
-                    : "",
+                answer: x.attempts?.length ? x.attempts[x.attempts.length - 1].answer || "" : "",
                 correct: x.correct
             }))
         });
@@ -548,26 +631,70 @@
         show("groupChoiceScreen");
     }
 
-    async function loadGroupWords(item) {
+    async function loadGroupData(item) {
         const response = await fetch(item.path, { cache: "no-store" });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const loadedWords = await response.json();
-        if (!Array.isArray(loadedWords)) throw new Error("A szócsoport JSON fájlja nem tömböt tartalmaz.");
-        const validWords = loadedWords.filter(x => x && typeof x.hu === "string" && typeof x.de === "string");
-        if (validWords.length === 0) throw new Error("A szócsoportban nincs érvényes szó.");
-        return validWords;
+        const data = await response.json();
+        if (!Array.isArray(data)) throw new Error("A szócsoport JSON fájlja nem tömböt tartalmaz.");
+
+        const type = item.type || "words";
+
+        if (type === "verbs") {
+            const items = data.filter(x =>
+                x &&
+                typeof x.infinitiv === "string" &&
+                typeof x.hu === "string" &&
+                typeof x.praeteritum === "string" &&
+                typeof x.perfekt === "string"
+            );
+            if (!items.length) throw new Error("Az ige JSON-ban nincs érvényes ige.");
+            return { type: "verbs", items };
+        }
+
+        // Régi típusok kompatibilitása: ezeket már nem javasolt használni,
+        // de a korábbi fájlok továbbra is betölthetők.
+        if (type === "praeteritum" || type === "perfekt") {
+            const items = data.filter(x =>
+                x && typeof x.infinitiv === "string" && typeof x.hu === "string"
+            );
+            if (!items.length) throw new Error("Az ige JSON-ban nincs érvényes ige.");
+            return { type: "verbs", items };
+        }
+
+        const items = data.filter(x => x && typeof x.hu === "string" && typeof x.de === "string");
+        if (!items.length) throw new Error("A szócsoportban nincs érvényes szó.");
+        return { type: "words", items };
     }
 
     async function showWordList(item) {
         try {
-            const wordsForList = await loadGroupWords(item);
-            const sortedWords = [...wordsForList].sort((a,b) => a.de.localeCompare(b.de, "de", { sensitivity: "base" }));
+            const data = await loadGroupData(item);
+            const sortedItems = [...data.items].sort((a, b) => {
+                const aa = data.type === "words" ? a.de : a.infinitiv;
+                const bb = data.type === "words" ? b.de : b.infinitiv;
+                return aa.localeCompare(bb, "de", { sensitivity: "base" });
+            });
+
             $("wordListTitle").textContent = item.friendlyName || "Szócsoport";
-            $("wordListCount").textContent = `${sortedWords.length} szó`;
-            $("wordList").innerHTML = `
-                <div class="word-list-row word-list-header"><div>Német</div><div></div><div>Magyar</div></div>
-                ${sortedWords.map(word => `<div class="word-list-row"><div class="german">${escapeHtml(word.de)}</div><div class="dash">-</div><div>${escapeHtml(word.hu)}</div></div>`).join("")}
-            `;
+            $("wordListCount").textContent = `${sortedItems.length} ${data.type === "words" ? "szó" : "ige"}`;
+
+            if (data.type === "words") {
+                $("wordList").innerHTML = `
+                    <div class="word-list-row word-list-header"><div>Német</div><div></div><div>Magyar</div></div>
+                    ${sortedItems.map(word => `<div class="word-list-row"><div class="german">${escapeHtml(word.de)}</div><div class="dash">-</div><div>${escapeHtml(word.hu)}</div></div>`).join("")}
+                `;
+            } else {
+                $("wordList").innerHTML = `
+                    <div class="word-list-row word-list-header"><div>Infinitiv</div><div>Präteritum</div><div>Perfekt</div></div>
+                    ${sortedItems.map(word => `
+                        <div class="verb-list-row">
+                            <div class="german">${escapeHtml(word.infinitiv)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div>
+                            <div>${escapeHtml(word.praeteritum)}</div>
+                            <div>${escapeHtml(word.perfekt)}</div>
+                        </div>
+                    `).join("")}
+                `;
+            }
             show("wordListScreen");
         } catch (error) {
             alert(`Nem sikerült betölteni a szócsoportot:
@@ -578,29 +705,204 @@ ${error.message}`);
 
     async function startPractice(item) {
         try {
-            const validWords = await loadGroupWords(item);
+            const data = await loadGroupData(item);
+
+            if (data.type === "verbs") {
+                startVerbPractice(item, data.items);
+                return;
+            }
 
             currentCatalog = item;
-            words = shuffle(validWords);
+            words = shuffle(data.items);
             currentWordIndex = 0;
             currentResults = [];
-            roundQueue = words.map((word, index) => ({
-                word,
-                originalIndex: index
-            }));
+            roundQueue = words.map((word, index) => ({ word, originalIndex: index }));
             roundNumber = 1;
             answered = false;
-
             $("practiceTitle").textContent = item.friendlyName;
             $("feedback").className = "feedback";
             $("feedback").textContent = "";
             $("currentResults").innerHTML = "";
-
             show("practiceScreen");
             renderQuestion();
         } catch (error) {
-            alert(`Nem sikerült betölteni a szócsoportot:\n\n${error.message}`);
+            alert(`Nem sikerült betölteni a szócsoportot:
+
+${error.message}`);
         }
+    }
+
+    function startVerbPractice(item, verbs) {
+        currentCatalog = item;
+        words = shuffle(verbs);
+        currentWordIndex = 0;
+        currentResults = [];
+        roundQueue = words.map((word, index) => ({ word, originalIndex: index }));
+        roundNumber = 1;
+        answered = false;
+        $("verbPracticeTitle").textContent = item.friendlyName;
+        $("verbFeedback").className = "feedback";
+        $("verbFeedback").textContent = "";
+        $("verbCurrentResults").innerHTML = "";
+        show("verbPracticeScreen");
+        renderVerbQuestion();
+    }
+
+    function renderVerbQuestion() {
+        const item = roundQueue[currentWordIndex];
+        const word = item.word;
+        answered = false;
+
+        $("verbCounter").textContent = `${currentWordIndex + 1} / ${roundQueue.length} · ${roundNumber}. kör`;
+        $("verbQuestionWord").textContent = `${word.infinitiv} (${word.hu})`;
+        $("verbPraeteritumInput").value = "";
+        $("verbPerfektInput").value = "";
+        $("verbPraeteritumInput").disabled = false;
+        $("verbPerfektInput").disabled = false;
+        $("verbFeedback").className = "feedback";
+        $("verbFeedback").textContent = "";
+        $("verbProgressBar").style.width = `${(currentWordIndex / roundQueue.length) * 100}%`;
+        setTimeout(() => $("verbPraeteritumInput").focus(), 0);
+    }
+
+    function checkVerbAnswer() {
+        if (answered) return;
+
+        const item = roundQueue[currentWordIndex];
+        const word = item.word;
+        const praeteritumAnswer = normalizeAnswer($("verbPraeteritumInput").value);
+        const perfektAnswer = normalizeAnswer($("verbPerfektInput").value);
+        const expectedPraeteritum = normalizeAnswer(word.praeteritum);
+        const expectedPerfekt = normalizeAnswer(word.perfekt);
+        const praeteritumCorrect = praeteritumAnswer === expectedPraeteritum;
+        const perfektCorrect = perfektAnswer === expectedPerfekt;
+        const correct = praeteritumCorrect && perfektCorrect;
+
+        answered = true;
+
+        if (!currentResults[item.originalIndex]) {
+            currentResults[item.originalIndex] = {
+                hu: word.hu,
+                infinitiv: word.infinitiv,
+                praeteritum: expectedPraeteritum,
+                perfekt: expectedPerfekt,
+                attempts: [],
+                correct: false
+            };
+        }
+
+        const result = currentResults[item.originalIndex];
+        result.attempts.push({
+            praeteritum: praeteritumAnswer,
+            perfekt: perfektAnswer,
+            praeteritumCorrect,
+            perfektCorrect,
+            correct,
+            round: roundNumber
+        });
+
+        if (correct) result.correct = true;
+
+        const feedback = $("verbFeedback");
+        if (correct) {
+            feedback.className = "feedback good";
+            feedback.innerHTML = "✓ Mindkét alak helyes!";
+        } else {
+            feedback.className = "feedback bad";
+            feedback.innerHTML = `
+                <div>✕ Nem jó, ezt az igét újra kérdezzük.</div>
+                <div class="verb-feedback-lines">
+                    <div class="verb-feedback-line">Präteritum: ${praeteritumCorrect ? "✓ helyes" : `✕ helyes: <strong>${escapeHtml(expectedPraeteritum)}</strong>`}</div>
+                    <div class="verb-feedback-line">Perfekt: ${perfektCorrect ? "✓ helyes" : `✕ helyes: <strong>${escapeHtml(expectedPerfekt)}</strong>`}</div>
+                </div>
+                <button id="wrongVerbAnswerOk" class="primary" type="button" style="margin-top:12px;">OK</button>
+            `;
+        }
+
+        $("verbPraeteritumInput").disabled = true;
+        $("verbPerfektInput").disabled = true;
+        $("verbProgressBar").style.width = `${((currentWordIndex + 1) / roundQueue.length) * 100}%`;
+        renderVerbCurrentResults();
+
+        if (correct) {
+            setTimeout(advanceToNextVerb, 1400);
+        } else {
+            $("wrongVerbAnswerOk").focus();
+            $("wrongVerbAnswerOk").addEventListener("click", advanceToNextVerb);
+        }
+    }
+
+    function advanceToNextVerb() {
+        if (!answered) return;
+
+        currentWordIndex++;
+
+        if (currentWordIndex >= roundQueue.length) {
+            const retryQueue = roundQueue.filter(item => !currentResults[item.originalIndex].correct);
+
+            if (retryQueue.length === 0) {
+                finishPractice();
+                return;
+            }
+
+            roundQueue = shuffle(retryQueue);
+            currentWordIndex = 0;
+            roundNumber++;
+            renderVerbCurrentResults();
+            renderVerbQuestion();
+        } else {
+            renderVerbQuestion();
+        }
+    }
+
+    function renderVerbCurrentResults() {
+        const completed = currentResults.filter(Boolean);
+        const retryMode = roundNumber > 1;
+
+        $("verbCurrentResults").innerHTML = `
+            <div class="round-summary">
+                <strong>${completed.filter(x => x.correct).length} / ${completed.length}</strong>
+                ige már mindkét alakban helyes
+            </div>
+            ${completed.map(item => {
+                const attempts = item.attempts || [];
+                const last = attempts[attempts.length - 1];
+
+                if (retryMode) {
+                    return `
+                        <div class="result-item locked-result">
+                            <div class="result-icon ${item.correct ? "good" : "bad"}">${item.correct ? "✓" : "✕"}</div>
+                            <div>
+                                <div class="result-hu">${escapeHtml(item.infinitiv)} (${escapeHtml(item.hu)})</div>
+                                <div class="result-detail">
+                                    ${item.correct ? "Mindkét alak helyes" : `Újra kérdezzük · utolsó kör: Präteritum ${last?.praeteritumCorrect ? "✓" : "✕"}, Perfekt ${last?.perfektCorrect ? "✓" : "✕"}`}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <details class="result-item">
+                        <summary>
+                            <span class="result-icon ${item.correct ? "good" : "bad"}">${item.correct ? "✓" : "✕"}</span>
+                            <span>
+                                <span class="result-hu">${escapeHtml(item.infinitiv)} (${escapeHtml(item.hu)})</span>
+                                <span class="result-detail">${item.correct ? "Mindkét alak helyes" : "Hibás"}</span>
+                            </span>
+                        </summary>
+                        <div class="result-attempts">
+                            ${attempts.map((attempt, index) => `
+                                <div>
+                                    ${index + 1}. kör: Präteritum ${attempt.praeteritumCorrect ? "✓" : "✕"} <strong>${escapeHtml(attempt.praeteritum || "(üres)")}</strong> · Perfekt ${attempt.perfektCorrect ? "✓" : "✕"} <strong>${escapeHtml(attempt.perfekt || "(üres)")}</strong>
+                                    ${attempt.praeteritumCorrect && attempt.perfektCorrect ? "" : `<br>Helyes: <strong>${escapeHtml(item.praeteritum)}</strong> · <strong>${escapeHtml(item.perfekt)}</strong>`}
+                                </div>
+                            `).join("")}
+                        </div>
+                    </details>
+                `;
+            }).join("")}
+        `;
     }
 
     function renderQuestion() {
@@ -746,7 +1048,7 @@ ${error.message}`);
                                 ${item.correct ? "✓" : "✕"}
                             </span>
                             <span>
-                                <span class="result-hu">${escapeHtml(item.hu)}</span>
+                                <span class="result-hu">${escapeHtml(item.infinitiv ? `${item.infinitiv} (${item.hu})` : item.hu)}</span>
                                 <span class="result-detail">
                                     ${item.correct ? "Helyes" : "Hibás"}
                                 </span>
@@ -775,8 +1077,12 @@ ${error.message}`);
             .filter(Boolean)
             .flatMap(item => item.attempts || []);
 
-        const totalAnswers = allAttempts.length;
-        const correctAnswers = allAttempts.filter(attempt => attempt.correct).length;
+        const isVerbGroup = currentCatalog.type === "verbs";
+        const totalAnswers = isVerbGroup ? allAttempts.length * 2 : allAttempts.length;
+        const correctAnswers = isVerbGroup
+            ? allAttempts.reduce((sum, attempt) =>
+                sum + (attempt.praeteritumCorrect ? 1 : 0) + (attempt.perfektCorrect ? 1 : 0), 0)
+            : allAttempts.filter(attempt => attempt.correct).length;
         const totalWords = currentResults.filter(Boolean).length;
 
         $("summaryStats").innerHTML = `
@@ -790,7 +1096,7 @@ ${error.message}`);
             </div>
             <div>
                 <div class="summary-number">${totalWords}</div>
-                <div class="summary-label">megtanult szó</div>
+                <div class="summary-label">${isVerbGroup ? "megtanult ige" : "megtanult szó"}</div>
             </div>
         `;
 
@@ -804,6 +1110,33 @@ ${error.message}`);
 
     function renderResultItem(item) {
         const attempts = item.attempts || [];
+        const isVerb = Boolean(item.infinitiv && (item.praeteritum || item.perfekt));
+
+        if (isVerb) {
+            return `
+                <details class="result-item">
+                    <summary>
+                        <span class="result-icon good">✓</span>
+                        <span>
+                            <span class="result-hu">${escapeHtml(item.infinitiv)} (${escapeHtml(item.hu)})</span>
+                            <span class="result-detail">
+                                ${attempts.length === 1 ? "Elsőre mindkettő helyes" : `${attempts.length}. próbálkozásra lett helyes`}
+                            </span>
+                        </span>
+                    </summary>
+                    <div class="result-attempts">
+                        ${attempts.map((attempt, index) => `
+                            <div>
+                                ${index + 1}. kör:
+                                Präteritum ${attempt.praeteritumCorrect ? "✓" : "✕"} <strong>${escapeHtml(attempt.praeteritum || "(üres)")}</strong> ·
+                                Perfekt ${attempt.perfektCorrect ? "✓" : "✕"} <strong>${escapeHtml(attempt.perfekt || "(üres)")}</strong>
+                                ${attempt.praeteritumCorrect && attempt.perfektCorrect ? "" : `<br>Helyes: <strong>${escapeHtml(item.praeteritum)}</strong> · <strong>${escapeHtml(item.perfekt)}</strong>`}
+                            </div>
+                        `).join("")}
+                    </div>
+                </details>
+            `;
+        }
 
         return `
             <details class="result-item">
@@ -812,17 +1145,14 @@ ${error.message}`);
                     <span>
                         <span class="result-hu">${escapeHtml(item.hu)}</span>
                         <span class="result-detail">
-                            ${attempts.length === 1
-                                ? "Elsőre helyes"
-                                : `${attempts.length}. próbálkozásra lett helyes`}
+                            ${attempts.length === 1 ? "Elsőre helyes" : `${attempts.length}. próbálkozásra lett helyes`}
                         </span>
                     </span>
                 </summary>
                 <div class="result-attempts">
                     ${attempts.map((attempt, index) => `
                         <div>
-                            ${index + 1}. kör:
-                            ${attempt.correct ? "✓" : "✕"}
+                            ${index + 1}. kör: ${attempt.correct ? "✓" : "✕"}
                             <strong>${escapeHtml(attempt.answer || "(üres)")}</strong>
                             ${attempt.correct ? "" : ` · Helyes: <strong>${escapeHtml(item.expected)}</strong>`}
                         </div>
@@ -866,7 +1196,7 @@ ${error.message}`);
                 <div class="summary-label">helyes válasz</div>
             </div>
             <div>
-                <div class="summary-number">${Math.round(item.score.correct / item.score.total * 100)}%</div>
+                <div class="summary-number">${item.score.total ? Math.round(item.score.correct / item.score.total * 100) : 0}%</div>
                 <div class="summary-label">eredmény</div>
             </div>
             <div>
@@ -895,12 +1225,18 @@ ${error.message}`);
         checkAnswer();
     });
 
+    $("verbAnswerForm").addEventListener("submit", event => {
+        event.preventDefault();
+        checkVerbAnswer();
+    });
+
     $("groupChoiceBackButton").addEventListener("click", () => show("catalogScreen"));
     $("viewWordsButton").addEventListener("click", () => showWordList(currentCatalog));
     $("startPracticeButton").addEventListener("click", () => startPractice(currentCatalog));
     $("wordListBackButton").addEventListener("click", () => show("groupChoiceScreen"));
 
     $("backButton").addEventListener("click", () => show("catalogScreen"));
+    $("verbBackButton").addEventListener("click", () => show("catalogScreen"));
     $("summaryBackButton").addEventListener("click", () => show("catalogScreen"));
     $("historyButton").addEventListener("click", () => {
         renderHistory();
