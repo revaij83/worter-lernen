@@ -33,5 +33,82 @@
     "praesens": "bleibt",
     "praeteritum": "blieb",
     "perfekt": "ist geblieben"
-  }
+  },
+  {
+    "infinitiv": "gewinnen",
+    "hu": "nyerni",
+    "praesens": "gewinnt",
+    "praeteritum": "gewann",
+    "perfekt": "hat gewonnen"
+  },
+  {
+    "infinitiv": "schwimmen",
+    "hu": "úszni",
+    "praesens": "schwimmt",
+    "praeteritum": "schwamm",
+    "perfekt": "ist geschwommen"
+  },
+  {
+    "infinitiv": "sprechen",
+    "hu": "beszélni",
+    "praesens": "spricht",
+    "praeteritum": "sprach",
+    "perfekt": "hat gesprochen"
+  },
+  {
+    "infinitiv": "nehmen",
+    "hu": "venni, elvenni",
+    "praesens": "nimmt",
+    "praeteritum": "nahm",
+    "perfekt": "hat genommen"
+  },
+  {
+    "infinitiv": "treffen",
+    "hu": "találkozni, eltalálni",
+    "praesens": "trifft",
+    "praeteritum": "traf",
+    "perfekt": "hat getroffen"
+  },
+  {
+    "infinitiv": "kommen",
+    "hu": "jönni",
+    "praesens": "kommt",
+    "praeteritum": "kam",
+    "perfekt": "ist gekommen"
+  },
+  {
+    "infinitiv": "singen",
+    "hu": "énekelni",
+    "praesens": "singt",
+    "praeteritum": "sang",
+    "perfekt": "hat gesungen"
+  },
+  {
+    "infinitiv": "binden",
+    "hu": "kötni",
+    "praesens": "bindet",
+    "praeteritum": "band",
+    "perfekt": "hat gebunden"
+  },
+  {
+    "infinitiv": "finden",
+    "hu": "találni, megtalálni",
+    "praesens": "findet",
+    "praeteritum": "fand",
+    "perfekt": "hat gefunden"
+  },
+  {
+    "infinitiv": "springen",
+    "hu": "ugrani",
+    "praesens": "springt",
+    "praeteritum": "sprang",
+    "perfekt": "ist gesprungen"
+  },
+  {
+    "infinitiv": "trinken",
+    "hu": "inni",
+    "praesens": "trinkt",
+    "praeteritum": "trank",
+    "perfekt": "hat getrunken"
+  }  
 ]
