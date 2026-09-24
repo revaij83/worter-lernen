@@ -1,0 +1,37 @@
+[
+  {
+    "infinitiv": "backen",
+    "hu": "sütni",
+    "praesens": "bäckt/backt",
+    "praeteritum": "backte/buk",
+    "perfekt": "hat gebacken"
+  },
+  {
+    "infinitiv": "beginnen",
+    "hu": "elkezdeni",
+    "praesens": "beginnt",
+    "praeteritum": "begann",
+    "perfekt": "hat begonnen"
+  },
+  {
+    "infinitiv": "bieten",
+    "hu": "kínálni, nyújtani",
+    "praesens": "bietet",
+    "praeteritum": "bot",
+    "perfekt": "hat geboten"
+  },
+  {
+    "infinitiv": "bitten",
+    "hu": "kérni",
+    "praesens": "bittet",
+    "praeteritum": "bat",
+    "perfekt": "hat gebeten"
+  },
+  {
+    "infinitiv": "bleiben",
+    "hu": "maradni",
+    "praesens": "bleibt",
+    "praeteritum": "blieb",
+    "perfekt": "ist geblieben"
+  }
+]
