@@ -906,7 +906,7 @@ ${error.message}`);
                 return { ...x, type: "verb" };
             }
 
-            if (x.type === "noun" || (!x.type && typeof x.singular === "string" && typeof x.plural === "string")) {
+            if (x.type === "noun" || x.type === "plural" || (!x.type && typeof x.singular === "string" && typeof x.plural === "string")) {
                 if (typeof x.hu !== "string" || typeof x.singular !== "string" || typeof x.plural !== "string") return null;
                 return { ...x, type: "noun", article: x.article || "die" };
             }
