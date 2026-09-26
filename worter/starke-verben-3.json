@@ -4,132 +4,151 @@
     "hu": "repülni",
     "praesens": "fliegt",
     "praeteritum": "flog",
-    "perfekt": "ist geflogen"
+    "perfekt": "ist geflogen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "schließen",
     "hu": "bezárni",
     "praesens": "schließt",
     "praeteritum": "schloss",
-    "perfekt": "hat geschlossen"
+    "perfekt": "hat geschlossen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "verlieren",
     "hu": "elveszíteni",
     "praesens": "verliert",
     "praeteritum": "verlor",
-    "perfekt": "hat verloren"
+    "perfekt": "hat verloren",
+    "type": "starkverb"
   },
   {
     "infinitiv": "ziehen",
     "hu": "húzni",
     "praesens": "zieht",
     "praeteritum": "zog",
-    "perfekt": "hat gezogen"
+    "perfekt": "hat gezogen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "bitten",
     "hu": "kérni",
     "praesens": "bittet",
     "praeteritum": "bat",
-    "perfekt": "hat gebeten"
+    "perfekt": "hat gebeten",
+    "type": "starkverb"
   },
   {
     "infinitiv": "geben",
     "hu": "adni",
     "praesens": "gibt",
     "praeteritum": "gab",
-    "perfekt": "hat gegeben"
+    "perfekt": "hat gegeben",
+    "type": "starkverb"
   },
   {
     "infinitiv": "liegen",
     "hu": "feküdni",
     "praesens": "liegt",
     "praeteritum": "lag",
-    "perfekt": "hat gelegen"
+    "perfekt": "hat gelegen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "sehen",
     "hu": "látni",
     "praesens": "sieht",
     "praeteritum": "sah",
-    "perfekt": "hat gesehen"
+    "perfekt": "hat gesehen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "lesen",
     "hu": "olvasni",
     "praesens": "liest",
     "praeteritum": "las",
-    "perfekt": "hat gelesen"
+    "perfekt": "hat gelesen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "essen",
     "hu": "enni",
     "praesens": "isst",
     "praeteritum": "aß",
-    "perfekt": "hat gegessen"
+    "perfekt": "hat gegessen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "sitzen",
     "hu": "ülni",
     "praesens": "sitzt",
     "praeteritum": "saß",
-    "perfekt": "hat gesessen"
+    "perfekt": "hat gesessen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "steigen",
     "hu": "felszállni, emelkedni",
     "praesens": "steigt",
     "praeteritum": "stieg",
-    "perfekt": "ist gestiegen"
+    "perfekt": "ist gestiegen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "bleiben",
     "hu": "maradni",
     "praesens": "bleibt",
     "praeteritum": "blieb",
-    "perfekt": "ist geblieben"
+    "perfekt": "ist geblieben",
+    "type": "starkverb"
   },
   {
     "infinitiv": "schreien",
     "hu": "kiabálni, sikítani",
     "praesens": "schreit",
     "praeteritum": "schrie",
-    "perfekt": "hat geschrien"
+    "perfekt": "hat geschrien",
+    "type": "starkverb"
   },
   {
     "infinitiv": "lassen",
     "hu": "hagyni, engedni",
     "praesens": "lässt",
     "praeteritum": "ließ",
-    "perfekt": "hat gelassen"
+    "perfekt": "hat gelassen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "rufen",
     "hu": "hívni, kiáltani",
     "praesens": "ruft",
     "praeteritum": "rief",
-    "perfekt": "hat gerufen"
+    "perfekt": "hat gerufen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "laufen",
     "hu": "futni",
     "praesens": "läuft",
     "praeteritum": "lief",
-    "perfekt": "ist gelaufen"
+    "perfekt": "ist gelaufen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "fallen",
     "hu": "esni",
     "praesens": "fällt",
     "praeteritum": "fiel",
-    "perfekt": "ist gefallen"
+    "perfekt": "ist gefallen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "schlafen",
     "hu": "aludni",
     "praesens": "schläft",
     "praeteritum": "schlief",
-    "perfekt": "hat geschlafen"
+    "perfekt": "hat geschlafen",
+    "type": "starkverb"
   }
 ]

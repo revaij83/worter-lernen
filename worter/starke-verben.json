@@ -4,34 +4,39 @@
     "hu": "sütni",
     "praesens": "bäckt/backt",
     "praeteritum": "backte/buk",
-    "perfekt": "hat gebacken"
+    "perfekt": "hat gebacken",
+    "type": "starkverb"
   },
   {
     "infinitiv": "beginnen",
     "hu": "elkezdeni",
     "praesens": "beginnt",
     "praeteritum": "begann",
-    "perfekt": "hat begonnen"
+    "perfekt": "hat begonnen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "bieten",
     "hu": "kínálni, nyújtani",
     "praesens": "bietet",
     "praeteritum": "bot",
-    "perfekt": "hat geboten"
+    "perfekt": "hat geboten",
+    "type": "starkverb"
   },
   {
     "infinitiv": "bitten",
     "hu": "kérni",
     "praesens": "bittet",
     "praeteritum": "bat",
-    "perfekt": "hat gebeten"
+    "perfekt": "hat gebeten",
+    "type": "starkverb"
   },
   {
     "infinitiv": "bleiben",
     "hu": "maradni",
     "praesens": "bleibt",
     "praeteritum": "blieb",
-    "perfekt": "ist geblieben"
+    "perfekt": "ist geblieben",
+    "type": "starkverb"
   }
 ]

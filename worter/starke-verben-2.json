@@ -4,76 +4,87 @@
     "hu": "nyerni",
     "praesens": "gewinnt",
     "praeteritum": "gewann",
-    "perfekt": "hat gewonnen"
+    "perfekt": "hat gewonnen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "schwimmen",
     "hu": "úszni",
     "praesens": "schwimmt",
     "praeteritum": "schwamm",
-    "perfekt": "ist geschwommen"
+    "perfekt": "ist geschwommen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "sprechen",
     "hu": "beszélni",
     "praesens": "spricht",
     "praeteritum": "sprach",
-    "perfekt": "hat gesprochen"
+    "perfekt": "hat gesprochen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "nehmen",
     "hu": "venni, elvenni",
     "praesens": "nimmt",
     "praeteritum": "nahm",
-    "perfekt": "hat genommen"
+    "perfekt": "hat genommen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "treffen",
     "hu": "találkozni, eltalálni",
     "praesens": "trifft",
     "praeteritum": "traf",
-    "perfekt": "hat getroffen"
+    "perfekt": "hat getroffen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "kommen",
     "hu": "jönni",
     "praesens": "kommt",
     "praeteritum": "kam",
-    "perfekt": "ist gekommen"
+    "perfekt": "ist gekommen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "singen",
     "hu": "énekelni",
     "praesens": "singt",
     "praeteritum": "sang",
-    "perfekt": "hat gesungen"
+    "perfekt": "hat gesungen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "binden",
     "hu": "kötni",
     "praesens": "bindet",
     "praeteritum": "band",
-    "perfekt": "hat gebunden"
+    "perfekt": "hat gebunden",
+    "type": "starkverb"
   },
   {
     "infinitiv": "finden",
     "hu": "találni, megtalálni",
     "praesens": "findet",
     "praeteritum": "fand",
-    "perfekt": "hat gefunden"
+    "perfekt": "hat gefunden",
+    "type": "starkverb"
   },
   {
     "infinitiv": "springen",
     "hu": "ugrani",
     "praesens": "springt",
     "praeteritum": "sprang",
-    "perfekt": "ist gesprungen"
+    "perfekt": "ist gesprungen",
+    "type": "starkverb"
   },
   {
     "infinitiv": "trinken",
     "hu": "inni",
     "praesens": "trinkt",
     "praeteritum": "trank",
-    "perfekt": "hat getrunken"
+    "perfekt": "hat getrunken",
+    "type": "starkverb"
   }
 ]

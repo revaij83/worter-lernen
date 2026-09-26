@@ -1,262 +1,228 @@
 [
   {
-    "type": "word",
     "hu": "északon",
     "de": "im Norden"
   },
   {
-    "type": "noun",
+    "type": "plural",
     "hu": "evezőcsónak",
     "singular": "Ruderboot",
     "plural": "Ruderboote",
     "article": "das"
   },
   {
-    "type": "word",
     "hu": "ezért",
     "de": "deshalb"
   },
   {
-    "type": "word",
     "hu": "a nagypapámhoz",
     "de": "zu meinem Opa"
   },
   {
-    "type": "word",
     "hu": "a nagynénémhez",
     "de": "zu meiner Tante"
   },
   {
-    "type": "noun",
+    "type": "plural",
     "hu": "városnéző séta",
     "singular": "Stadtbummel",
     "plural": "Stadtbummel",
     "article": "der"
   },
   {
-    "type": "noun",
+    "type": "plural",
     "hu": "fánk",
     "singular": "Krapfen",
     "plural": "Krapfen",
     "article": "der"
   },
   {
-    "type": "word",
     "hu": "beszélni",
     "de": "reden"
   },
   {
-    "type": "word",
     "hu": "lélegezni",
     "de": "atmen"
   },
   {
-    "type": "noun",
+    "type": "plural",
     "hu": "férfi rokon",
     "singular": "Verwandte",
     "plural": "Verwandten",
     "article": "der"
   },
   {
-    "type": "noun",
+    "type": "plural",
     "hu": "női rokon",
     "singular": "Verwandte",
     "plural": "Verwandten",
     "article": "die"
   },
   {
-    "type": "word",
     "hu": "rokonok",
     "de": "die Verwandten"
   },
   {
-    "type": "noun",
+    "type": "plural",
     "hu": "fiú unokatestvér",
     "singular": "Cousin",
     "plural": "Cousins",
     "article": "der"
   },
   {
-    "type": "noun",
+    "type": "plural",
     "hu": "lány unokatestvér",
     "singular": "Cousine",
     "plural": "Cousinen",
     "article": "die"
   },
   {
-    "type": "word",
     "hu": "cuki, aranyos",
     "de": "niedlich"
   },
   {
-    "type": "noun",
+    "type": "plural",
     "hu": "fiú unoka",
     "singular": "Enkel",
     "plural": "Enkel",
     "article": "der"
   },
   {
-    "type": "noun",
+    "type": "plural",
     "hu": "lány unoka",
     "singular": "Enkelin",
     "plural": "Enkelinnen",
     "article": "die"
   },
   {
-    "type": "noun",
+    "type": "plural",
     "hu": "katona",
     "singular": "Soldat",
     "plural": "Soldaten",
     "article": "der"
   },
   {
-    "type": "word",
     "hu": "nőtlen, hajadon",
     "de": "ledig"
   },
   {
-    "type": "word",
     "hu": "karcsú, vékony",
     "de": "schlank"
   },
   {
-    "type": "word",
     "hu": "őszinte",
     "de": "ehrlich"
   },
   {
-    "type": "word",
     "hu": "göndör",
     "de": "lockig"
   },
   {
-    "type": "word",
     "hu": "félénk, szégyenlős",
     "de": "schüchtern"
   },
   {
-    "type": "word",
     "hu": "sportos",
     "de": "sportlich"
   },
   {
-    "type": "word",
     "hu": "türelmes",
     "de": "geduldig"
   },
   {
-    "type": "word",
     "hu": "segítőkész",
     "de": "hilfsbereit"
   },
   {
-    "type": "word",
     "hu": "kopasz",
     "de": "glatzköpfig"
   },
   {
-    "type": "word",
     "hu": "megbízható",
     "de": "zuverlässig"
   },
   {
-    "type": "word",
     "hu": "ápolt",
     "de": "gepflegt"
   },
   {
-    "type": "word",
     "hu": "féltékeny",
     "de": "eifersüchtig"
   },
   {
-    "type": "word",
     "hu": "lusta",
     "de": "faul"
   },
   {
-    "type": "word",
     "hu": "szeplős",
     "de": "sommersprossig"
   },
   {
-    "type": "word",
     "hu": "magabiztos",
     "de": "selbstbewusst"
   },
   {
-    "type": "word",
     "hu": "kíváncsi",
     "de": "neugierig"
   },
   {
-    "type": "word",
     "hu": "izmos",
     "de": "muskulös"
   },
   {
-    "type": "word",
     "hu": "makacs",
     "de": "stur"
   },
   {
-    "type": "word",
     "hu": "barátságos",
     "de": "freundlich"
   },
   {
-    "type": "word",
     "hu": "kócos, borzas",
     "de": "zerzaust"
   },
   {
-    "type": "word",
     "hu": "kitartó",
     "de": "ausdauernd"
   },
   {
-    "type": "word",
     "hu": "feltűnő",
     "de": "auffällig"
   },
   {
-    "type": "word",
     "hu": "nagy",
     "de": "groß"
   },
   {
-    "type": "word",
     "hu": "elegáns",
     "de": "elegant"
   },
   {
-    "type": "noun",
+    "type": "plural",
     "hu": "foglalkozás, szakma",
     "singular": "Beruf",
     "plural": "Berufe",
     "article": "der"
   },
   {
-    "type": "noun",
+    "type": "plural",
     "hu": "származás, eredet",
     "singular": "Herkunft",
     "plural": "Herkünfte",
     "article": "die"
   },
   {
-    "type": "noun",
+    "type": "plural",
     "hu": "lakóhely",
     "singular": "Wohnort",
     "plural": "Wohnorte",
     "article": "der"
   },
   {
-    "type": "word",
     "hu": "életkor",
     "de": "das Alter"
   },
   {
-    "type": "word",
     "hu": "házas",
     "de": "verheiratet"
   }
