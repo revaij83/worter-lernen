@@ -1,0 +1,135 @@
+[
+  {
+    "infinitiv": "fliegen",
+    "hu": "repülni",
+    "praesens": "fliegt",
+    "praeteritum": "flog",
+    "perfekt": "ist geflogen"
+  },
+  {
+    "infinitiv": "schließen",
+    "hu": "bezárni",
+    "praesens": "schließt",
+    "praeteritum": "schloss",
+    "perfekt": "hat geschlossen"
+  },
+  {
+    "infinitiv": "verlieren",
+    "hu": "elveszíteni",
+    "praesens": "verliert",
+    "praeteritum": "verlor",
+    "perfekt": "hat verloren"
+  },
+  {
+    "infinitiv": "ziehen",
+    "hu": "húzni",
+    "praesens": "zieht",
+    "praeteritum": "zog",
+    "perfekt": "hat gezogen"
+  },
+  {
+    "infinitiv": "bitten",
+    "hu": "kérni",
+    "praesens": "bittet",
+    "praeteritum": "bat",
+    "perfekt": "hat gebeten"
+  },
+  {
+    "infinitiv": "geben",
+    "hu": "adni",
+    "praesens": "gibt",
+    "praeteritum": "gab",
+    "perfekt": "hat gegeben"
+  },
+  {
+    "infinitiv": "liegen",
+    "hu": "feküdni",
+    "praesens": "liegt",
+    "praeteritum": "lag",
+    "perfekt": "hat gelegen"
+  },
+  {
+    "infinitiv": "sehen",
+    "hu": "látni",
+    "praesens": "sieht",
+    "praeteritum": "sah",
+    "perfekt": "hat gesehen"
+  },
+  {
+    "infinitiv": "lesen",
+    "hu": "olvasni",
+    "praesens": "liest",
+    "praeteritum": "las",
+    "perfekt": "hat gelesen"
+  },
+  {
+    "infinitiv": "essen",
+    "hu": "enni",
+    "praesens": "isst",
+    "praeteritum": "aß",
+    "perfekt": "hat gegessen"
+  },
+  {
+    "infinitiv": "sitzen",
+    "hu": "ülni",
+    "praesens": "sitzt",
+    "praeteritum": "saß",
+    "perfekt": "hat gesessen"
+  },
+  {
+    "infinitiv": "steigen",
+    "hu": "felszállni, emelkedni",
+    "praesens": "steigt",
+    "praeteritum": "stieg",
+    "perfekt": "ist gestiegen"
+  },
+  {
+    "infinitiv": "bleiben",
+    "hu": "maradni",
+    "praesens": "bleibt",
+    "praeteritum": "blieb",
+    "perfekt": "ist geblieben"
+  },
+  {
+    "infinitiv": "schreien",
+    "hu": "kiabálni, sikítani",
+    "praesens": "schreit",
+    "praeteritum": "schrie",
+    "perfekt": "hat geschrien"
+  },
+  {
+    "infinitiv": "lassen",
+    "hu": "hagyni, engedni",
+    "praesens": "lässt",
+    "praeteritum": "ließ",
+    "perfekt": "hat gelassen"
+  },
+  {
+    "infinitiv": "rufen",
+    "hu": "hívni, kiáltani",
+    "praesens": "ruft",
+    "praeteritum": "rief",
+    "perfekt": "hat gerufen"
+  },
+  {
+    "infinitiv": "laufen",
+    "hu": "futni",
+    "praesens": "läuft",
+    "praeteritum": "lief",
+    "perfekt": "ist gelaufen"
+  },
+  {
+    "infinitiv": "fallen",
+    "hu": "esni",
+    "praesens": "fällt",
+    "praeteritum": "fiel",
+    "perfekt": "ist gefallen"
+  },
+  {
+    "infinitiv": "schlafen",
+    "hu": "aludni",
+    "praesens": "schläft",
+    "praeteritum": "schlief",
+    "perfekt": "hat geschlafen"
+  }
+]
