@@ -99,6 +99,26 @@
     .choice-button { background:#eef2ff; color:#312e81; border:1px solid #c7d2fe; }
     .choice-button:hover { background:#e0e7ff; }
     .word-list { margin-top:18px; overflow-x:auto; }
+    .dictionary-row {
+        display:grid;
+        grid-template-columns:minmax(320px, 1.15fr) minmax(220px, 1fr);
+        column-gap:28px;
+        align-items:baseline;
+        padding:9px 0;
+        border-bottom:1px solid var(--border);
+        font-size:17px;
+    }
+    .dictionary-row .german { font-weight:600; }
+    .dictionary-header {
+        font-size:14px;
+        color:var(--muted);
+        font-weight:650;
+        border-bottom:2px solid var(--border);
+    }
+    .dictionary-forms { line-height:1.45; }
+    @media (max-width:700px) {
+        .dictionary-row { grid-template-columns:minmax(220px, 1.2fr) minmax(140px, 1fr); column-gap:14px; }
+    }
     .word-list-row { display:grid; grid-template-columns:280px 28px minmax(180px,1fr); column-gap:8px; align-items:baseline; padding:7px 0; border-bottom:1px solid var(--border); font-size:17px; }
     .word-list-row .german { font-weight:600; }
     .word-list-row .dash { text-align:center; color:var(--muted); }
@@ -752,11 +772,9 @@ ${error.message}`);
     }
 
     async function loadGroupData(item) {
-        // A kezdőoldalon több szócsoport is kijelölhető; ilyenkor a már
-        // betöltött elemeket közvetlenül használjuk, nem próbáljuk újra
-        // a nem létező közös path-ról betölteni őket.
+        // Több szócsoport kijelölésekor a már betöltött elemeket közvetlenül használjuk.
         if (Array.isArray(item.items)) {
-            return { type: item.type || "mixed", items: item.items };
+            return { type: item.type || "mixed", items: item.items.map(normalizeItem) };
         }
 
         const response = await fetch(item.path, { cache: "no-store" });
@@ -766,41 +784,20 @@ ${error.message}`);
 
         const type = item.type || "words";
 
-        const normalizeMixedItem = x => {
-            if (!x || typeof x !== "object") return null;
-
-            if (x.type === "verb" || (!x.type && typeof x.infinitiv === "string")) {
-                if (typeof x.infinitiv !== "string" || typeof x.hu !== "string" ||
-                    typeof x.praesens !== "string" || typeof x.praeteritum !== "string" ||
-                    typeof x.perfekt !== "string") return null;
-                return { ...x, type: "verb" };
-            }
-
-            if (x.type === "noun" || (!x.type && typeof x.singular === "string" && typeof x.plural === "string")) {
-                if (typeof x.hu !== "string" || typeof x.singular !== "string" || typeof x.plural !== "string") return null;
-                return { ...x, type: "noun", article: x.article || "die" };
-            }
-
-            if (x.type === "word" || (!x.type && typeof x.de === "string" && typeof x.hu === "string")) {
-                if (typeof x.hu !== "string" || typeof x.de !== "string") return null;
-                return { ...x, type: "word" };
-            }
-
-            return null;
-        };
-
         if (type === "verbs") {
+            // A külön ige-szócsoportok elemei type nélkül is működnek,
+            // mert a katalógus type:"verbs" egyértelműen meghatározza őket.
             const items = data.filter(x =>
                 x && typeof x.infinitiv === "string" && typeof x.hu === "string" &&
                 typeof x.praesens === "string" && typeof x.praeteritum === "string" &&
                 typeof x.perfekt === "string"
-            ).map(x => ({ ...x, type: "verb" }));
+            ).map(x => ({ ...x, type: "starkverb" }));
             if (!items.length) throw new Error("Az ige JSON-ban nincs érvényes ige.");
             return { type: "verbs", items };
         }
 
         if (type === "mixed") {
-            const items = data.map(normalizeMixedItem).filter(Boolean);
+            const items = data.map(normalizeItem).filter(Boolean);
             if (!items.length) throw new Error("A vegyes szócsoportban nincs érvényes elem.");
             return { type: "mixed", items };
         }
@@ -808,7 +805,7 @@ ${error.message}`);
         // Régi típusok kompatibilitása.
         if (type === "praeteritum" || type === "perfekt") {
             const items = data.filter(x => x && typeof x.infinitiv === "string" && typeof x.hu === "string")
-                .map(x => ({ ...x, type: "verb" }));
+                .map(x => ({ ...x, type: "starkverb" }));
             if (!items.length) throw new Error("Az ige JSON-ban nincs érvényes ige.");
             return { type: "verbs", items };
         }
@@ -819,8 +816,52 @@ ${error.message}`);
         return { type: "words", items };
     }
 
+    function normalizeItem(x) {
+        if (!x || typeof x !== "object" || typeof x.hu !== "string") return null;
+
+        // A JSON-ban használható explicit típusok:
+        //   nincs type / word -> egyszerű, egymezős szó
+        //   plural           -> főnév, Singular + Plural
+        //   starkverb        -> erős/rendhagyó ige, 3 alak
+        // A régi noun/verb neveket is elfogadjuk.
+        if (x.type === "starkverb" || x.type === "verb") {
+            if (typeof x.infinitiv !== "string" ||
+                typeof x.praesens !== "string" ||
+                typeof x.praeteritum !== "string" ||
+                typeof x.perfekt !== "string") return null;
+            return { ...x, type: "starkverb" };
+        }
+
+        if (x.type === "plural" || x.type === "noun") {
+            if (typeof x.singular !== "string" || typeof x.plural !== "string") return null;
+            return { ...x, type: "plural", article: x.article || "die" };
+        }
+
+        // Nincs type -> szándékosan egyszerű szó, akkor is, ha történetesen
+        // egy ige infinitivje van benne (pl. lélegezni - atmen).
+        if (!x.type || x.type === "word") {
+            if (typeof x.de !== "string") return null;
+            return { ...x, type: "word" };
+        }
+
+        return null;
+    }
+
+
     function itemSortKey(word) {
-        return word.type === "verb" ? word.infinitiv : word.type === "noun" ? word.singular : word.de;
+        if (word.type === "starkverb") return word.infinitiv;
+        if (word.type === "plural") return word.singular;
+        return word.de;
+    }
+
+    function dictionaryGerman(word) {
+        if (word.type === "starkverb") {
+            return `${word.infinitiv}, ${word.praesens}, ${word.praeteritum}, ${word.perfekt}`;
+        }
+        if (word.type === "plural") {
+            return `${word.article || "die"} ${word.singular}, die ${word.plural}`;
+        }
+        return word.de;
     }
 
     async function showWordList(item) {
@@ -833,41 +874,21 @@ ${error.message}`);
             $("wordListTitle").textContent = item.friendlyName || "Szócsoport";
             $("wordListCount").textContent = `${sortedItems.length} elem`;
 
-            if (data.type === "words") {
-                $("wordList").innerHTML = `
-                    <div class="word-list-row word-list-header"><div>Német</div><div></div><div>Magyar</div></div>
-                    ${sortedItems.map(word => `<div class="word-list-row"><div class="german">${escapeHtml(word.de)}</div><div class="dash">-</div><div>${escapeHtml(word.hu)}</div></div>`).join("")}
-                `;
-            } else if (data.type === "verbs") {
-                $("wordList").innerHTML = `
-                    <div class="verb-list-row verb-list-header"><div>Infinitiv</div><div>Präsens</div><div>Präteritum</div><div>Perfekt</div></div>
-                    ${sortedItems.map(word => `
-                        <div class="verb-list-row">
-                            <div class="german">${escapeHtml(word.infinitiv)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div>
-                            <div>${escapeHtml(word.praesens)}</div>
-                            <div>${escapeHtml(word.praeteritum)}</div>
-                            <div>${escapeHtml(word.perfekt)}</div>
-                        </div>
-                    `).join("")}
-                `;
-            } else {
-                $("wordList").innerHTML = sortedItems.map(word => {
-                    if (word.type === "verb") {
-                        return `
-                            <div class="verb-list-row verb-list-header"><div>Infinitiv</div><div>Präsens</div><div>Präteritum</div><div>Perfekt</div></div>
-                            <div class="verb-list-row">
-                                <div class="german">${escapeHtml(word.infinitiv)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div>
-                                <div>${escapeHtml(word.praesens)}</div><div>${escapeHtml(word.praeteritum)}</div><div>${escapeHtml(word.perfekt)}</div>
-                            </div>`;
-                    }
-                    if (word.type === "noun") {
-                        return `
-                            <div class="word-list-row word-list-header"><div>Singular</div><div></div><div>Plural</div></div>
-                            <div class="word-list-row"><div class="german">${escapeHtml(word.singular)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div><div class="dash">-</div><div>${escapeHtml(word.plural)}</div></div>`;
-                    }
-                    return `<div class="word-list-row"><div class="german">${escapeHtml(word.de)}</div><div class="dash">-</div><div>${escapeHtml(word.hu)}</div></div>`;
-                }).join("");
-            }
+            // Minden típus ugyanabban a "szótárfüzet" formában jelenik meg:
+            // bal oldalon a teljes német alak, jobb oldalon a magyar jelentés.
+            $("wordList").innerHTML = `
+                <div class="dictionary-row dictionary-header">
+                    <div>Német</div>
+                    <div>Magyar</div>
+                </div>
+                ${sortedItems.map(word => `
+                    <div class="dictionary-row">
+                        <div class="german dictionary-forms">${escapeHtml(dictionaryGerman(word))}</div>
+                        <div>${escapeHtml(word.hu)}</div>
+                    </div>
+                `).join("")}
+            `;
+
             show("wordListScreen");
         } catch (error) {
             alert(`Nem sikerült betölteni a szócsoportot:
@@ -875,6 +896,7 @@ ${error.message}`);
 ${error.message}`);
         }
     }
+
 
     async function startPractice(item) {
         try {
@@ -1121,15 +1143,16 @@ ${error.message}`);
         $("mixedProgressBar").style.width = `${(currentWordIndex / roundQueue.length) * 100}%`;
 
         const form = $("mixedAnswerForm");
-        if (word.type === "verb") {
+
+        if (word.type === "starkverb") {
             $("mixedQuestionLabel").textContent = `Írd le a megadott ige három alakját: ${word.infinitiv} (${word.hu})`;
             form.innerHTML = `
                 <div class="multi-answer-row"><label>Präsens (E/3):</label><input id="mixedA1" type="text" autocomplete="off" spellcheck="false"></div>
                 <div class="multi-answer-row"><label>Präteritum:</label><input id="mixedA2" type="text" autocomplete="off" spellcheck="false"></div>
                 <div class="multi-answer-row"><label>Perfekt:</label><input id="mixedA3" type="text" autocomplete="off" spellcheck="false"></div>
                 <button class="primary" type="submit">Ellenőrzés</button>`;
-        } else if (word.type === "noun") {
-            $("mixedQuestionLabel").textContent = "Írd le a főnév két alakját:";
+        } else if (word.type === "plural") {
+            $("mixedQuestionLabel").textContent = "Írd le a főnév két alakját a névelővel együtt:";
             form.innerHTML = `
                 <div class="multi-answer-row"><label>Singular:</label><input id="mixedA1" type="text" autocomplete="off" spellcheck="false"></div>
                 <div class="multi-answer-row"><label>Plural:</label><input id="mixedA2" type="text" autocomplete="off" spellcheck="false"></div>
@@ -1142,6 +1165,7 @@ ${error.message}`);
         setTimeout(() => $("mixedA1").focus(), 0);
     }
 
+
     function checkMixedAnswer() {
         if (answered) return;
 
@@ -1151,13 +1175,27 @@ ${error.message}`);
         const expected = [];
         const labels = [];
 
-        if (word.type === "verb") {
-            answers.push(normalizeAnswer($("mixedA1").value), normalizeAnswer($("mixedA2").value), normalizeAnswer($("mixedA3").value));
-            expected.push(normalizeAnswer(word.praesens), normalizeAnswer(word.praeteritum), normalizeAnswer(word.perfekt));
+        if (word.type === "starkverb") {
+            answers.push(
+                normalizeAnswer($("mixedA1").value),
+                normalizeAnswer($("mixedA2").value),
+                normalizeAnswer($("mixedA3").value)
+            );
+            expected.push(
+                normalizeAnswer(word.praesens),
+                normalizeAnswer(word.praeteritum),
+                normalizeAnswer(word.perfekt)
+            );
             labels.push("Präsens", "Präteritum", "Perfekt");
-        } else if (word.type === "noun") {
-            answers.push(normalizeAnswer($("mixedA1").value), normalizeAnswer($("mixedA2").value));
-            expected.push(normalizeAnswer(word.singular), normalizeAnswer(word.plural));
+        } else if (word.type === "plural") {
+            answers.push(
+                normalizeAnswer($("mixedA1").value),
+                normalizeAnswer($("mixedA2").value)
+            );
+            expected.push(
+                normalizeAnswer(`${word.article || "die"} ${word.singular}`),
+                normalizeAnswer(`die ${word.plural}`)
+            );
             labels.push("Singular", "Plural");
         } else {
             answers.push(normalizeAnswer($("mixedA1").value));
@@ -1187,13 +1225,28 @@ ${error.message}`);
         }
 
         const result = currentResults[item.originalIndex];
-        result.attempts.push({ answers, expected, correctFlags, correct, round: roundNumber, answer: answers[0] || "", answerCount: answers.length, correctCount: correctFlags.filter(Boolean).length });
+        result.attempts.push({
+            answers,
+            expected,
+            correctFlags,
+            correct,
+            round: roundNumber,
+            answer: answers[0] || "",
+            answerCount: answers.length,
+            correctCount: correctFlags.filter(Boolean).length,
+            praesensCorrect: word.type === "starkverb" ? correctFlags[0] : undefined,
+            praeteritumCorrect: word.type === "starkverb" ? correctFlags[1] : undefined,
+            perfektCorrect: word.type === "starkverb" ? correctFlags[2] : undefined
+        });
+
         if (correct) result.correct = true;
 
         const feedback = $("mixedFeedback");
         if (correct) {
             feedback.className = "feedback good";
-            feedback.innerHTML = word.type === "verb" ? "✓ Mindhárom alak helyes!" : word.type === "noun" ? "✓ Mindkét alak helyes!" : "✓ Helyes!";
+            feedback.innerHTML =
+                word.type === "starkverb" ? "✓ Mindhárom alak helyes!" :
+                word.type === "plural" ? "✓ Mindkét alak helyes!" : "✓ Helyes!";
         } else {
             feedback.className = "feedback bad";
             feedback.innerHTML = `
@@ -1204,13 +1257,24 @@ ${error.message}`);
                 <button id="wrongMixedAnswerOk" class="primary" type="button" style="margin-top:12px;">OK</button>`;
         }
 
-        [...$("mixedAnswerForm").querySelectorAll("input")].forEach(input => input.disabled = true);
+        formDisable("mixedAnswerForm", true);
         $("mixedProgressBar").style.width = `${((currentWordIndex + 1) / roundQueue.length) * 100}%`;
+
         renderMixedCurrentResults();
 
-        if (correct) setTimeout(advanceToNextMixed, 1400);
-        else { $("wrongMixedAnswerOk").focus(); $("wrongMixedAnswerOk").addEventListener("click", advanceToNextMixed); }
+        if (correct) {
+            setTimeout(advanceToNextMixed, 1400);
+        } else {
+            $("wrongMixedAnswerOk").focus();
+            $("wrongMixedAnswerOk").addEventListener("click", advanceToNextMixed);
+        }
     }
+
+    function formDisable(formId, disabled) {
+        const form = $(formId);
+        if (form) form.querySelectorAll("input, button").forEach(el => el.disabled = disabled);
+    }
+
 
     function advanceToNextMixed() {
         if (!answered) return;
@@ -1232,13 +1296,38 @@ ${error.message}`);
         $("mixedCurrentResults").innerHTML = `
             <div class="round-summary"><strong>${completed.filter(x => x.correct).length} / ${completed.length}</strong> elem már teljesen helyes</div>
             ${completed.map(item => {
-                const last = item.attempts[item.attempts.length - 1];
-                const title = item.type === "verb" ? `${item.infinitiv} (${item.hu})` : item.type === "noun" ? `${item.article || "die"} ${item.singular} (${item.hu})` : item.hu;
+                const title =
+                    item.type === "starkverb"
+                        ? `${item.infinitiv} (${item.hu})`
+                        : item.type === "plural"
+                            ? `${item.article || "die"} ${item.singular} (${item.hu})`
+                            : item.hu;
+
                 return retryMode ? `
-                    <div class="result-item locked-result"><div class="result-icon ${item.correct ? "good" : "bad"}">${item.correct ? "✓" : "✕"}</div><div><div class="result-hu">${escapeHtml(title)}</div><div class="result-detail">${item.correct ? "Helyes" : "Újra kérdezzük"}</div></div></div>` : `
-                    <details class="result-item"><summary><span class="result-icon ${item.correct ? "good" : "bad"}">${item.correct ? "✓" : "✕"}</span><span><span class="result-hu">${escapeHtml(title)}</span><span class="result-detail">${item.correct ? "Helyes" : "Hibás"}</span></span></summary><div class="result-attempts">${(item.attempts || []).map((a,i) => `<div>${i+1}. kör: ${a.correct ? "✓" : "✕"} ${a.answers.map((x,j)=>`<strong>${escapeHtml(x || "(üres)")}</strong>`).join(" · ")}</div>`).join("")}</div></details>`;
+                    <div class="result-item locked-result">
+                        <div class="result-icon ${item.correct ? "good" : "bad"}">${item.correct ? "✓" : "✕"}</div>
+                        <div>
+                            <div class="result-hu">${escapeHtml(title)}</div>
+                            <div class="result-detail">${item.correct ? "Helyes" : "Újra kérdezzük"}</div>
+                        </div>
+                    </div>` : `
+                    <details class="result-item">
+                        <summary>
+                            <span class="result-icon ${item.correct ? "good" : "bad"}">${item.correct ? "✓" : "✕"}</span>
+                            <span>
+                                <span class="result-hu">${escapeHtml(title)}</span>
+                                <span class="result-detail">${item.correct ? "Helyes" : "Hibás"}</span>
+                            </span>
+                        </summary>
+                        <div class="result-attempts">
+                            ${(item.attempts || []).map((a,i) =>
+                                `<div>${i+1}. kör: ${a.correct ? "✓" : "✕"} ${a.answers.map((x)=>`<strong>${escapeHtml(x || "(üres)")}</strong>`).join(" · ")}</div>`
+                            ).join("")}
+                        </div>
+                    </details>`;
             }).join("")}`;
     }
+
 
     function renderQuestion() {
         const item = roundQueue[currentWordIndex];
@@ -1445,7 +1534,8 @@ ${error.message}`);
 
     function renderResultItem(item) {
         const attempts = item.attempts || [];
-        const isVerb = Boolean(item.infinitiv && (item.praesens || item.praeteritum || item.perfekt));
+        const isVerb = item.type === "starkverb" || Boolean(item.infinitiv && (item.praesens || item.praeteritum || item.perfekt));
+        const isNoun = item.type === "plural" || Boolean(item.singular && item.plural);
 
         if (isVerb) {
             return `
@@ -1460,32 +1550,50 @@ ${error.message}`);
                         </span>
                     </summary>
                     <div class="result-attempts">
-                        ${attempts.map((attempt, index) => `
-                            <div>
-                                ${index + 1}. kör:
-                                Präsens ${attempt.praesensCorrect ? "✓" : "✕"} <strong>${escapeHtml(attempt.praesens || "(üres)")}</strong> ·
-                                Präteritum ${attempt.praeteritumCorrect ? "✓" : "✕"} <strong>${escapeHtml(attempt.praeteritum || "(üres)")}</strong> ·
-                                Perfekt ${attempt.perfektCorrect ? "✓" : "✕"} <strong>${escapeHtml(attempt.perfekt || "(üres)")}</strong>
-                                ${attempt.praesensCorrect && attempt.praeteritumCorrect && attempt.perfektCorrect ? "" : `<br>Helyes: <strong>${escapeHtml(item.praesens)}</strong> · <strong>${escapeHtml(item.praeteritum)}</strong> · <strong>${escapeHtml(item.perfekt)}</strong>`}
-                            </div>
-                        `).join("")}
+                        ${attempts.map((attempt, index) => {
+                            const flags = attempt.correctFlags || [
+                                attempt.praesensCorrect,
+                                attempt.praeteritumCorrect,
+                                attempt.perfektCorrect
+                            ];
+                            const answers = attempt.answers || [
+                                attempt.praesens,
+                                attempt.praeteritum,
+                                attempt.perfekt
+                            ];
+                            return `
+                                <div>
+                                    ${index + 1}. kör:
+                                    Präsens ${flags[0] ? "✓" : "✕"} <strong>${escapeHtml(answers[0] || "(üres)")}</strong> ·
+                                    Präteritum ${flags[1] ? "✓" : "✕"} <strong>${escapeHtml(answers[1] || "(üres)")}</strong> ·
+                                    Perfekt ${flags[2] ? "✓" : "✕"} <strong>${escapeHtml(answers[2] || "(üres)")}</strong>
+                                    ${attempt.correct ? "" : `<br>Helyes: <strong>${escapeHtml(item.praesens)}</strong> · <strong>${escapeHtml(item.praeteritum)}</strong> · <strong>${escapeHtml(item.perfekt)}</strong>`}
+                                </div>`;
+                        }).join("")}
                     </div>
                 </details>
             `;
         }
 
-        if (item.singular && item.plural) {
+        if (isNoun) {
+            const expectedSingular = `${item.article || "die"} ${item.singular}`;
+            const expectedPlural = `die ${item.plural}`;
             return `
                 <details class="result-item">
                     <summary>
                         <span class="result-icon good">✓</span>
-                        <span><span class="result-hu">${escapeHtml(item.singular)} (${escapeHtml(item.hu)})</span><span class="result-detail">${attempts.length === 1 ? "Elsőre mindkét alak helyes" : `${attempts.length}. próbálkozásra lett helyes`}</span></span>
+                        <span>
+                            <span class="result-hu">${escapeHtml(item.hu)}</span>
+                            <span class="result-detail">${attempts.length === 1 ? "Elsőre mindkét alak helyes" : `${attempts.length}. próbálkozásra lett helyes`}</span>
+                        </span>
                     </summary>
                     <div class="result-attempts">
-                        ${attempts.map((attempt, index) => `
-                            <div>${index + 1}. kör: ${attempt.correct ? "✓" : "✕"} <strong>${escapeHtml(attempt.answers ? attempt.answers.join(" · ") : (attempt.answer || "(üres)"))}</strong>
-                            ${attempt.correct ? "" : `<br>Helyes: <strong>${escapeHtml(item.singular)}</strong> · <strong>${escapeHtml(item.plural)}</strong>`}</div>
-                        `).join("")}
+                        ${attempts.map((attempt, index) => {
+                            const answers = attempt.answers || [attempt.answer || "", ""];
+                            const flags = attempt.correctFlags || [attempt.correct, attempt.correct];
+                            return `<div>${index + 1}. kör: ${flags[0] ? "✓" : "✕"} <strong>${escapeHtml(answers[0] || "(üres)")}</strong> · ${flags[1] ? "✓" : "✕"} <strong>${escapeHtml(answers[1] || "(üres)")}</strong>
+                            ${attempt.correct ? "" : `<br>Helyes: <strong>${escapeHtml(expectedSingular)}</strong> · <strong>${escapeHtml(expectedPlural)}</strong>`}</div>`;
+                        }).join("")}
                     </div>
                 </details>`;
         }
@@ -1513,6 +1621,7 @@ ${error.message}`);
             </details>
         `;
     }
+
 
     function renderHistory() {
         const history = loadHistory();
