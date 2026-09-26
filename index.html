@@ -558,6 +558,7 @@
     let currentWordIndex = 0;
     let currentResults = [];
     let currentCatalog = null;
+    let selectedCatalogs = [];
     let answered = false;
     let roundQueue = [];
     let roundNumber = 1;
@@ -684,30 +685,64 @@
             return;
         }
 
+        selectedCatalogs = [];
+
         catalog.forEach((item, index) => {
             const button = document.createElement("button");
             button.className = "catalog-button";
             button.type = "button";
             button.innerHTML = `<span>${escapeHtml(item.friendlyName || `Szócsoport ${index + 1}`)}</span>`;
             button.addEventListener("click", () => {
-                document.querySelectorAll(".catalog-button").forEach(b => {
-                    b.classList.remove("selected");
-                    const check = b.querySelector(".catalog-check");
+                const selected = selectedCatalogs.includes(item);
+                if (selected) {
+                    selectedCatalogs = selectedCatalogs.filter(x => x !== item);
+                    button.classList.remove("selected");
+                    const check = button.querySelector(".catalog-check");
                     if (check) check.remove();
-                });
-                button.classList.add("selected");
-                button.insertAdjacentHTML("beforeend", `<span class="catalog-check">✓</span>`);
-                currentCatalog = item;
-                $("catalogGoButton").disabled = false;
+                } else {
+                    selectedCatalogs.push(item);
+                    button.classList.add("selected");
+                    button.insertAdjacentHTML("beforeend", `<span class="catalog-check">✓</span>`);
+                }
+
+                currentCatalog = selectedCatalogs.length === 1 ? selectedCatalogs[0] : null;
+                $("catalogGoButton").disabled = selectedCatalogs.length === 0;
             });
             container.appendChild(button);
         });
     }
 
-    function goToSelectedGroup() {
-        if (!currentCatalog) return;
-        $("groupChoiceTitle").textContent = currentCatalog.friendlyName || "Szócsoport";
-        show("groupChoiceScreen");
+    async function goToSelectedGroup() {
+        if (!selectedCatalogs.length) return;
+
+        if (selectedCatalogs.length === 1) {
+            currentCatalog = selectedCatalogs[0];
+            $("groupChoiceTitle").textContent = currentCatalog.friendlyName || "Szócsoport";
+            show("groupChoiceScreen");
+            return;
+        }
+
+        try {
+            const loaded = await Promise.all(selectedCatalogs.map(async item => {
+                const data = await loadGroupData(item);
+                return data.items;
+            }));
+
+            currentCatalog = {
+                id: selectedCatalogs.map(x => x.id).join("+") || "selected",
+                friendlyName: selectedCatalogs.map(x => x.friendlyName).join(" + "),
+                type: "mixed",
+                path: null,
+                items: loaded.flat()
+            };
+
+            $("groupChoiceTitle").textContent = currentCatalog.friendlyName;
+            show("groupChoiceScreen");
+        } catch (error) {
+            alert(`Nem sikerült betölteni a kijelölt szócsoportokat:
+
+${error.message}`);
+        }
     }
 
     function showGroupChoice(item) {
@@ -717,6 +752,13 @@
     }
 
     async function loadGroupData(item) {
+        // A kezdőoldalon több szócsoport is kijelölhető; ilyenkor a már
+        // betöltött elemeket közvetlenül használjuk, nem próbáljuk újra
+        // a nem létező közös path-ról betölteni őket.
+        if (Array.isArray(item.items)) {
+            return { type: item.type || "mixed", items: item.items };
+        }
+
         const response = await fetch(item.path, { cache: "no-store" });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
@@ -821,7 +863,7 @@
                     if (word.type === "noun") {
                         return `
                             <div class="word-list-row word-list-header"><div>Singular</div><div></div><div>Plural</div></div>
-                            <div class="word-list-row"><div class="german">${escapeHtml(word.article || "die")} ${escapeHtml(word.singular)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div><div class="dash">-</div><div>${escapeHtml(word.article || "die")} ${escapeHtml(word.plural)}</div></div>`;
+                            <div class="word-list-row"><div class="german">${escapeHtml(word.singular)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div><div class="dash">-</div><div>${escapeHtml(word.plural)}</div></div>`;
                     }
                     return `<div class="word-list-row"><div class="german">${escapeHtml(word.de)}</div><div class="dash">-</div><div>${escapeHtml(word.hu)}</div></div>`;
                 }).join("");
@@ -1089,8 +1131,8 @@ ${error.message}`);
         } else if (word.type === "noun") {
             $("mixedQuestionLabel").textContent = "Írd le a főnév két alakját:";
             form.innerHTML = `
-                <div class="multi-answer-row"><label>Singular:</label><div style="display:flex;align-items:center;gap:8px"><span class="multi-answer-prefix">${escapeHtml(word.article || "die")}</span><input id="mixedA1" type="text" autocomplete="off" spellcheck="false"></div></div>
-                <div class="multi-answer-row"><label>Plural:</label><div style="display:flex;align-items:center;gap:8px"><span class="multi-answer-prefix">${escapeHtml(word.article || "die")}</span><input id="mixedA2" type="text" autocomplete="off" spellcheck="false"></div></div>
+                <div class="multi-answer-row"><label>Singular:</label><input id="mixedA1" type="text" autocomplete="off" spellcheck="false"></div>
+                <div class="multi-answer-row"><label>Plural:</label><input id="mixedA2" type="text" autocomplete="off" spellcheck="false"></div>
                 <button class="primary" type="submit">Ellenőrzés</button>`;
         } else {
             $("mixedQuestionLabel").textContent = "Fordítsd németre:";
@@ -1437,7 +1479,7 @@ ${error.message}`);
                 <details class="result-item">
                     <summary>
                         <span class="result-icon good">✓</span>
-                        <span><span class="result-hu">${escapeHtml(item.article || "die")} ${escapeHtml(item.singular)} (${escapeHtml(item.hu)})</span><span class="result-detail">${attempts.length === 1 ? "Elsőre mindkét alak helyes" : `${attempts.length}. próbálkozásra lett helyes`}</span></span>
+                        <span><span class="result-hu">${escapeHtml(item.singular)} (${escapeHtml(item.hu)})</span><span class="result-detail">${attempts.length === 1 ? "Elsőre mindkét alak helyes" : `${attempts.length}. próbálkozásra lett helyes`}</span></span>
                     </summary>
                     <div class="result-attempts">
                         ${attempts.map((attempt, index) => `
