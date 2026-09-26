@@ -6,8 +6,8 @@
   {
     "type": "plural",
     "hu": "evezőcsónak",
-    "singular": "Ruderboot",
-    "plural": "Ruderboote",
+    "singular": "das Ruderboot",
+    "plural": "die Ruderboote",
     "article": "das"
   },
   {
@@ -25,15 +25,15 @@
   {
     "type": "plural",
     "hu": "városnéző séta",
-    "singular": "Stadtbummel",
-    "plural": "Stadtbummel",
+    "singular": "der Stadtbummel",
+    "plural": "die Stadtbummel",
     "article": "der"
   },
   {
     "type": "plural",
     "hu": "fánk",
-    "singular": "Krapfen",
-    "plural": "Krapfen",
+    "singular": "der Krapfen",
+    "plural": "die Krapfen",
     "article": "der"
   },
   {
@@ -47,15 +47,15 @@
   {
     "type": "plural",
     "hu": "férfi rokon",
-    "singular": "Verwandte",
-    "plural": "Verwandten",
+    "singular": "der Verwandte",
+    "plural": "die Verwandten",
     "article": "der"
   },
   {
     "type": "plural",
     "hu": "női rokon",
-    "singular": "Verwandte",
-    "plural": "Verwandten",
+    "singular": "die Verwandte",
+    "plural": "die Verwandten",
     "article": "die"
   },
   {
@@ -65,15 +65,15 @@
   {
     "type": "plural",
     "hu": "fiú unokatestvér",
-    "singular": "Cousin",
-    "plural": "Cousins",
+    "singular": "der Cousin",
+    "plural": "die Cousins",
     "article": "der"
   },
   {
     "type": "plural",
     "hu": "lány unokatestvér",
-    "singular": "Cousine",
-    "plural": "Cousinen",
+    "singular": "die Cousine",
+    "plural": "die Cousinen",
     "article": "die"
   },
   {
@@ -83,22 +83,22 @@
   {
     "type": "plural",
     "hu": "fiú unoka",
-    "singular": "Enkel",
-    "plural": "Enkel",
+    "singular": "der Enkel",
+    "plural": "die Enkel",
     "article": "der"
   },
   {
     "type": "plural",
     "hu": "lány unoka",
-    "singular": "Enkelin",
-    "plural": "Enkelinnen",
+    "singular": "die Enkelin",
+    "plural": "die Enkelinnen",
     "article": "die"
   },
   {
     "type": "plural",
     "hu": "katona",
-    "singular": "Soldat",
-    "plural": "Soldaten",
+    "singular": "der Soldat",
+    "plural": "die Soldaten",
     "article": "der"
   },
   {
@@ -200,22 +200,22 @@
   {
     "type": "plural",
     "hu": "foglalkozás, szakma",
-    "singular": "Beruf",
-    "plural": "Berufe",
+    "singular": "der Beruf",
+    "plural": "die Berufe",
     "article": "der"
   },
   {
     "type": "plural",
     "hu": "származás, eredet",
-    "singular": "Herkunft",
-    "plural": "Herkünfte",
+    "singular": "die Herkunft",
+    "plural": "die Herkünfte",
     "article": "die"
   },
   {
     "type": "plural",
     "hu": "lakóhely",
-    "singular": "Wohnort",
-    "plural": "Wohnorte",
+    "singular": "der Wohnort",
+    "plural": "die Wohnorte",
     "article": "der"
   },
   {
