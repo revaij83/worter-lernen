@@ -75,20 +75,6 @@
         transform: translateY(-1px);
     }
 
-    .word-list-type-title {
-      margin-top: 22px;
-      margin-bottom: 4px;
-      padding-top: 8px;
-      font-size: 17px;
-      font-weight: 700;
-      color: #163a63;
-      border-top: 1px solid #dfe3ea;
-    }
-    .word-list-type-title:first-child {
-      margin-top: 0;
-      border-top: 0;
-    }
-
     .catalog-button.selected {
         background: #dbeafe;
         border-color: var(--accent);
@@ -129,8 +115,6 @@
     .verb-list-row .german { font-weight:600; }
     .verb-list-header { font-size:14px; color:var(--muted); font-weight:650; border-bottom:2px solid var(--border); }
     .verb-hu { color:var(--muted); font-size:14px; font-weight:400; }
-    .verb-question-infinitiv { font-size:38px; font-weight:700; line-height:1.15; }
-    .verb-question-hu { color:var(--muted); font-size:16px; font-weight:400; margin-top:8px; }
     .verb-question .word { margin-bottom:18px; }
     .verb-answers {
         width: min(600px, 100%);
@@ -356,120 +340,6 @@
         font-size: 14px;
     }
 
-    .score-result {
-        position: relative;
-        flex: 0 0 100%;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 18px 0 28px;
-        min-height: 290px;
-        overflow: hidden;
-    }
-
-    .score-ring {
-        position: relative;
-        width: 250px;
-        height: 250px;
-    }
-
-    .score-ring svg {
-        width: 100%;
-        height: 100%;
-        transform: rotate(-90deg);
-        overflow: visible;
-    }
-
-    .score-ring-track,
-    .score-ring-value {
-        fill: none;
-        stroke-width: 16;
-    }
-
-    .score-ring-track {
-        stroke: #111827;
-    }
-
-    .score-ring-value {
-        stroke-linecap: round;
-        stroke-dasharray: 691.15;
-        stroke-dashoffset: 691.15;
-        animation: score-ring-fill 1.7s cubic-bezier(.2,.75,.25,1) forwards;
-    }
-
-    .score-ring.red .score-ring-value { stroke: #ef4444; }
-    .score-ring.yellow .score-ring-value { stroke: #f5b400; }
-    .score-ring.green .score-ring-value { stroke: #16b94a; }
-
-    .score-center {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        pointer-events: none;
-    }
-
-    .score-percent {
-        font-size: 58px;
-        line-height: 1;
-        font-weight: 800;
-        letter-spacing: -2px;
-    }
-
-    .score-ring.red .score-percent { color: #ef4444; }
-    .score-ring.yellow .score-percent { color: #f5b400; }
-    .score-ring.green .score-percent { color: #16b94a; }
-
-    .score-caption {
-        margin-top: 9px;
-        color: var(--muted);
-        font-size: 14px;
-    }
-
-    .score-stats {
-        display: flex;
-        justify-content: center;
-        gap: 42px;
-        margin-bottom: 24px;
-        text-align: center;
-    }
-
-    @keyframes score-ring-fill {
-        from { stroke-dashoffset: 691.15; }
-    }
-
-    .confetti {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-    }
-
-    .confetti span {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 8px;
-        height: 14px;
-        opacity: 0;
-        animation: confetti-burst 1.4s ease-out forwards;
-    }
-
-    .confetti span:nth-child(3n) { background: #ef4444; }
-    .confetti span:nth-child(3n+1) { background: #f5b400; }
-    .confetti span:nth-child(3n+2) { background: #16b94a; }
-    .confetti span:nth-child(4n) { transform: rotate(35deg); }
-    .confetti span:nth-child(4n+1) { transform: rotate(-25deg); }
-    .confetti span:nth-child(4n+2) { transform: rotate(65deg); }
-    .confetti span:nth-child(4n+3) { transform: rotate(-55deg); }
-
-    @keyframes confetti-burst {
-        0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
-        100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(420deg); }
-    }
-
     .history-list {
         display: grid;
         gap: 10px;
@@ -688,7 +558,6 @@
     let currentWordIndex = 0;
     let currentResults = [];
     let currentCatalog = null;
-    let selectedCatalogs = [];
     let answered = false;
     let roundQueue = [];
     let roundNumber = 1;
@@ -815,64 +684,30 @@
             return;
         }
 
-        selectedCatalogs = [];
-
         catalog.forEach((item, index) => {
             const button = document.createElement("button");
             button.className = "catalog-button";
             button.type = "button";
             button.innerHTML = `<span>${escapeHtml(item.friendlyName || `Szócsoport ${index + 1}`)}</span>`;
             button.addEventListener("click", () => {
-                const selected = selectedCatalogs.includes(item);
-                if (selected) {
-                    selectedCatalogs = selectedCatalogs.filter(x => x !== item);
-                    button.classList.remove("selected");
-                    const check = button.querySelector(".catalog-check");
+                document.querySelectorAll(".catalog-button").forEach(b => {
+                    b.classList.remove("selected");
+                    const check = b.querySelector(".catalog-check");
                     if (check) check.remove();
-                } else {
-                    selectedCatalogs.push(item);
-                    button.classList.add("selected");
-                    button.insertAdjacentHTML("beforeend", `<span class="catalog-check">✓</span>`);
-                }
-
-                currentCatalog = selectedCatalogs.length === 1 ? selectedCatalogs[0] : null;
-                $("catalogGoButton").disabled = selectedCatalogs.length === 0;
+                });
+                button.classList.add("selected");
+                button.insertAdjacentHTML("beforeend", `<span class="catalog-check">✓</span>`);
+                currentCatalog = item;
+                $("catalogGoButton").disabled = false;
             });
             container.appendChild(button);
         });
     }
 
-    async function goToSelectedGroup() {
-        if (!selectedCatalogs.length) return;
-
-        if (selectedCatalogs.length === 1) {
-            currentCatalog = selectedCatalogs[0];
-            $("groupChoiceTitle").textContent = currentCatalog.friendlyName || "Szócsoport";
-            show("groupChoiceScreen");
-            return;
-        }
-
-        try {
-            const loaded = await Promise.all(selectedCatalogs.map(async item => {
-                const data = await loadGroupData(item);
-                return data.items;
-            }));
-
-            currentCatalog = {
-                id: selectedCatalogs.map(x => x.id).join("+") || "selected",
-                friendlyName: selectedCatalogs.map(x => x.friendlyName).join(" + "),
-                type: "mixed",
-                path: null,
-                items: loaded.flat()
-            };
-
-            $("groupChoiceTitle").textContent = currentCatalog.friendlyName;
-            show("groupChoiceScreen");
-        } catch (error) {
-            alert(`Nem sikerült betölteni a kijelölt szócsoportokat:
-
-${error.message}`);
-        }
+    function goToSelectedGroup() {
+        if (!currentCatalog) return;
+        $("groupChoiceTitle").textContent = currentCatalog.friendlyName || "Szócsoport";
+        show("groupChoiceScreen");
     }
 
     function showGroupChoice(item) {
@@ -882,13 +717,6 @@ ${error.message}`);
     }
 
     async function loadGroupData(item) {
-        // A kezdőoldalon több szócsoport is kijelölhető; ilyenkor a már
-        // betöltött elemeket közvetlenül használjuk, nem próbáljuk újra
-        // a nem létező közös path-ról betölteni őket.
-        if (Array.isArray(item.items)) {
-            return { type: item.type || "mixed", items: item.items };
-        }
-
         const response = await fetch(item.path, { cache: "no-store" });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
@@ -981,34 +809,21 @@ ${error.message}`);
                     `).join("")}
                 `;
             } else {
-                const groups = [
-                    {
-                        type: "word",
-                        title: "Szavak",
-                        items: sortedItems.filter(word => word.type === "word"),
-                        render: word => `<div class="word-list-row"><div class="german">${escapeHtml(word.de)}</div><div class="dash">-</div><div>${escapeHtml(word.hu)}</div></div>`
-                    },
-                    {
-                        type: "noun",
-                        title: "Főnevek",
-                        items: sortedItems.filter(word => word.type === "noun"),
-                        render: word => `<div class="word-list-row"><div class="german">${escapeHtml(word.singular)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div><div class="dash">-</div><div>${escapeHtml(word.plural)}</div></div>`
-                    },
-                    {
-                        type: "verb",
-                        title: "Igék",
-                        items: sortedItems.filter(word => word.type === "verb"),
-                        render: word => `<div class="verb-list-row"><div class="german">${escapeHtml(word.infinitiv)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div><div>${escapeHtml(word.praesens)}</div><div>${escapeHtml(word.praeteritum)}</div><div>${escapeHtml(word.perfekt)}</div></div>`
+                $("wordList").innerHTML = sortedItems.map(word => {
+                    if (word.type === "verb") {
+                        return `
+                            <div class="verb-list-row verb-list-header"><div>Infinitiv</div><div>Präsens</div><div>Präteritum</div><div>Perfekt</div></div>
+                            <div class="verb-list-row">
+                                <div class="german">${escapeHtml(word.infinitiv)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div>
+                                <div>${escapeHtml(word.praesens)}</div><div>${escapeHtml(word.praeteritum)}</div><div>${escapeHtml(word.perfekt)}</div>
+                            </div>`;
                     }
-                ];
-
-                $("wordList").innerHTML = groups.filter(group => group.items.length).map(group => {
-                    const header = group.type === "verb"
-                        ? `<div class="verb-list-row verb-list-header"><div>Infinitiv</div><div>Präsens</div><div>Präteritum</div><div>Perfekt</div></div>`
-                        : group.type === "noun"
-                            ? `<div class="word-list-row word-list-header"><div>Singular</div><div></div><div>Plural</div></div>`
-                            : `<div class="word-list-row word-list-header"><div>Német</div><div></div><div>Magyar</div></div>`;
-                    return `<div class="word-list-type-title">${group.title}</div>${header}${group.items.map(group.render).join("")}`;
+                    if (word.type === "noun") {
+                        return `
+                            <div class="word-list-row word-list-header"><div>Singular</div><div></div><div>Plural</div></div>
+                            <div class="word-list-row"><div class="german">${escapeHtml(word.article || "die")} ${escapeHtml(word.singular)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div><div class="dash">-</div><div>${escapeHtml(word.article || "die")} ${escapeHtml(word.plural)}</div></div>`;
+                    }
+                    return `<div class="word-list-row"><div class="german">${escapeHtml(word.de)}</div><div class="dash">-</div><div>${escapeHtml(word.hu)}</div></div>`;
                 }).join("");
             }
             show("wordListScreen");
@@ -1075,7 +890,7 @@ ${error.message}`);
         answered = false;
 
         $("verbCounter").textContent = `${currentWordIndex + 1} / ${roundQueue.length} · ${roundNumber}. kör`;
-        $("verbQuestionWord").innerHTML = `<div class="verb-question-infinitiv">${escapeHtml(word.infinitiv)}</div><div class="verb-question-hu">(${escapeHtml(word.hu)})</div>`;
+        $("verbQuestionWord").textContent = `${word.infinitiv} (${word.hu})`;
         $("verbPraesensInput").value = "";
         $("verbPraeteritumInput").value = "";
         $("verbPerfektInput").value = "";
@@ -1258,18 +1073,14 @@ ${error.message}`);
         answered = false;
 
         $("mixedCounter").textContent = `${currentWordIndex + 1} / ${roundQueue.length} · ${roundNumber}. kör`;
-        if (word.type === "verb") {
-            $("mixedQuestionWord").innerHTML = `<div class="verb-question-infinitiv">${escapeHtml(word.infinitiv)}</div><div class="verb-question-hu">(${escapeHtml(word.hu)})</div>`;
-        } else {
-            $("mixedQuestionWord").textContent = word.hu;
-        }
+        $("mixedQuestionWord").textContent = word.hu;
         $("mixedFeedback").className = "feedback";
         $("mixedFeedback").textContent = "";
         $("mixedProgressBar").style.width = `${(currentWordIndex / roundQueue.length) * 100}%`;
 
         const form = $("mixedAnswerForm");
         if (word.type === "verb") {
-            $("mixedQuestionLabel").textContent = "Írd le a megadott ige három alakját:";
+            $("mixedQuestionLabel").textContent = `Írd le a megadott ige három alakját: ${word.infinitiv} (${word.hu})`;
             form.innerHTML = `
                 <div class="multi-answer-row"><label>Präsens (E/3):</label><input id="mixedA1" type="text" autocomplete="off" spellcheck="false"></div>
                 <div class="multi-answer-row"><label>Präteritum:</label><input id="mixedA2" type="text" autocomplete="off" spellcheck="false"></div>
@@ -1278,8 +1089,8 @@ ${error.message}`);
         } else if (word.type === "noun") {
             $("mixedQuestionLabel").textContent = "Írd le a főnév két alakját:";
             form.innerHTML = `
-                <div class="multi-answer-row"><label>Singular:</label><input id="mixedA1" type="text" autocomplete="off" spellcheck="false"></div>
-                <div class="multi-answer-row"><label>Plural:</label><input id="mixedA2" type="text" autocomplete="off" spellcheck="false"></div>
+                <div class="multi-answer-row"><label>Singular:</label><div style="display:flex;align-items:center;gap:8px"><span class="multi-answer-prefix">${escapeHtml(word.article || "die")}</span><input id="mixedA1" type="text" autocomplete="off" spellcheck="false"></div></div>
+                <div class="multi-answer-row"><label>Plural:</label><div style="display:flex;align-items:center;gap:8px"><span class="multi-answer-prefix">${escapeHtml(word.article || "die")}</span><input id="mixedA2" type="text" autocomplete="off" spellcheck="false"></div></div>
                 <button class="primary" type="submit">Ellenőrzés</button>`;
         } else {
             $("mixedQuestionLabel").textContent = "Fordítsd németre:";
@@ -1567,44 +1378,18 @@ ${error.message}`);
         const correctAnswers = score.correct;
         const totalWords = currentResults.filter(Boolean).length;
 
-        const percentage = totalAnswers ? Math.round(correctAnswers / totalAnswers * 100) : 0;
-        const ringClass = percentage > 90 ? "green" : percentage > 80 ? "yellow" : "red";
-        const circumference = 2 * Math.PI * 110;
-        const offset = circumference * (1 - percentage / 100);
-        const confetti = percentage === 100 ? `
-            <div class="confetti" aria-hidden="true">
-                ${Array.from({ length: 28 }, (_, i) => {
-                    const angle = (i / 28) * Math.PI * 2;
-                    const radius = 105 + (i % 4) * 24;
-                    const x = Math.round(Math.cos(angle) * radius);
-                    const y = Math.round(Math.sin(angle) * radius);
-                    return `<span style="--x:${x}px;--y:${y}px;animation-delay:${(i % 7) * 0.025}s"></span>`;
-                }).join("")}
-            </div>` : "";
-
         $("summaryStats").innerHTML = `
-            <div class="score-result">
-                ${confetti}
-                <div class="score-ring ${ringClass}">
-                    <svg viewBox="0 0 250 250" aria-label="${percentage}% eredmény">
-                        <circle class="score-ring-track" cx="125" cy="125" r="110"></circle>
-                        <circle class="score-ring-value" cx="125" cy="125" r="110" style="stroke-dashoffset:${offset};"></circle>
-                    </svg>
-                    <div class="score-center">
-                        <div class="score-percent">${percentage}%</div>
-                        <div class="score-caption">Kör vége</div>
-                    </div>
-                </div>
+            <div>
+                <div class="summary-number">${correctAnswers} / ${totalAnswers}</div>
+                <div class="summary-label">helyes válasz</div>
             </div>
-            <div class="score-stats">
-                <div>
-                    <div class="summary-number">${correctAnswers} / ${totalAnswers}</div>
-                    <div class="summary-label">helyes válasz</div>
-                </div>
-                <div>
-                    <div class="summary-number">${totalWords}</div>
-                    <div class="summary-label">megtanult elem</div>
-                </div>
+            <div>
+                <div class="summary-number">${totalAnswers ? Math.round(correctAnswers / totalAnswers * 100) : 0}%</div>
+                <div class="summary-label">összes beírt válaszból</div>
+            </div>
+            <div>
+                <div class="summary-number">${totalWords}</div>
+                <div class="summary-label">megtanult elem</div>
             </div>
         `;
 
@@ -1652,7 +1437,7 @@ ${error.message}`);
                 <details class="result-item">
                     <summary>
                         <span class="result-icon good">✓</span>
-                        <span><span class="result-hu">${escapeHtml(item.singular)} (${escapeHtml(item.hu)})</span><span class="result-detail">${attempts.length === 1 ? "Elsőre mindkét alak helyes" : `${attempts.length}. próbálkozásra lett helyes`}</span></span>
+                        <span><span class="result-hu">${escapeHtml(item.article || "die")} ${escapeHtml(item.singular)} (${escapeHtml(item.hu)})</span><span class="result-detail">${attempts.length === 1 ? "Elsőre mindkét alak helyes" : `${attempts.length}. próbálkozásra lett helyes`}</span></span>
                     </summary>
                     <div class="result-attempts">
                         ${attempts.map((attempt, index) => `

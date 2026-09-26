@@ -19,8 +19,8 @@
   },
   {
     "id": "starke-verben",
-    "friendlyName": "Starke Verben 3",
-    "path": "./worter/starke-verben-3.json",
+    "friendlyName": "Starke Verben - Alle zusammen",
+    "path": "./worter/starke-werben-zusammen.json",
     "type": "verbs"
   }
 ]
