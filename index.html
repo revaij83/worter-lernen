@@ -117,6 +117,18 @@
     .word-list-row .german { font-weight:600; }
     .word-list-row .dash { text-align:center; color:var(--muted); }
     .word-list-header { font-size:14px; color:var(--muted); font-weight:650; border-bottom:2px solid var(--border); }
+    .noun-list-row {
+        display:grid;
+        grid-template-columns: minmax(220px, 1.15fr) minmax(220px, 1.15fr) minmax(160px, 1fr);
+        column-gap:12px;
+        align-items:baseline;
+        padding:7px 0;
+        border-bottom:1px solid var(--border);
+        font-size:17px;
+        min-width:max-content;
+    }
+    .noun-list-row .german { font-weight:600; }
+    .noun-list-header { font-size:14px; color:var(--muted); font-weight:650; border-bottom:2px solid var(--border); }
     .verb-list-row {
         display:grid;
         grid-template-columns: minmax(230px, 1.2fr) minmax(120px, 1fr) minmax(130px, 1fr) minmax(150px, 1.2fr);
@@ -513,6 +525,7 @@
 
     @media (max-width: 600px) {
         .word-list-row { grid-template-columns:220px 28px minmax(180px,1fr); }
+        .noun-list-row { grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(140px, .9fr); font-size:15px; }
         .verb-list-row { grid-template-columns: minmax(230px, 1.2fr) minmax(120px, 1fr) minmax(130px, 1fr) minmax(150px, 1.2fr); column-gap:10px; font-size:15px; }
         .container { width: min(100% - 20px, 900px); margin-top: 20px; }
         .card { padding: 18px; }
@@ -992,7 +1005,7 @@ ${error.message}`);
                         type: "noun",
                         title: "Többes számú főnevek",
                         items: sortedItems.filter(word => word.type === "noun"),
-                        render: word => `<div class="word-list-row"><div class="german">${escapeHtml(word.singular)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div><div class="dash">-</div><div>${escapeHtml(word.plural)}</div></div>`
+                        render: word => `<div class="noun-list-row"><div class="german">${escapeHtml(word.singular)}</div><div class="german">${escapeHtml(word.plural)}</div><div>${escapeHtml(word.hu)}</div></div>`
                     },
                     {
                         type: "verb",
@@ -1006,7 +1019,7 @@ ${error.message}`);
                     const header = group.type === "verb"
                         ? `<div class="verb-list-row verb-list-header"><div>Infinitiv</div><div>Präsens</div><div>Präteritum</div><div>Perfekt</div></div>`
                         : group.type === "noun"
-                            ? `<div class="word-list-row word-list-header"><div>Singular</div><div></div><div>Plural</div></div>`
+                            ? `<div class="noun-list-row noun-list-header"><div>Singular</div><div>Plural</div><div>Magyar</div></div>`
                             : `<div class="word-list-row word-list-header"><div>Német</div><div></div><div>Magyar</div></div>`;
                     return `<div class="word-list-type-title">${group.title}</div>${header}${group.items.map(group.render).join("")}`;
                 }).join("");
