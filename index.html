@@ -356,6 +356,118 @@
         font-size: 14px;
     }
 
+    .score-result {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 18px 0 28px;
+        min-height: 290px;
+        overflow: hidden;
+    }
+
+    .score-ring {
+        position: relative;
+        width: 250px;
+        height: 250px;
+    }
+
+    .score-ring svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+        overflow: visible;
+    }
+
+    .score-ring-track,
+    .score-ring-value {
+        fill: none;
+        stroke-width: 16;
+    }
+
+    .score-ring-track {
+        stroke: #111827;
+    }
+
+    .score-ring-value {
+        stroke-linecap: round;
+        stroke-dasharray: 691.15;
+        stroke-dashoffset: 691.15;
+        animation: score-ring-fill 1.7s cubic-bezier(.2,.75,.25,1) forwards;
+    }
+
+    .score-ring.red .score-ring-value { stroke: #ef4444; }
+    .score-ring.yellow .score-ring-value { stroke: #f5b400; }
+    .score-ring.green .score-ring-value { stroke: #16b94a; }
+
+    .score-center {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+    .score-percent {
+        font-size: 58px;
+        line-height: 1;
+        font-weight: 800;
+        letter-spacing: -2px;
+    }
+
+    .score-ring.red .score-percent { color: #ef4444; }
+    .score-ring.yellow .score-percent { color: #f5b400; }
+    .score-ring.green .score-percent { color: #16b94a; }
+
+    .score-caption {
+        margin-top: 9px;
+        color: var(--muted);
+        font-size: 14px;
+    }
+
+    .score-stats {
+        display: flex;
+        justify-content: center;
+        gap: 42px;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+
+    @keyframes score-ring-fill {
+        from { stroke-dashoffset: 691.15; }
+    }
+
+    .confetti {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    .confetti span {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 8px;
+        height: 14px;
+        opacity: 0;
+        animation: confetti-burst 1.4s ease-out forwards;
+    }
+
+    .confetti span:nth-child(3n) { background: #ef4444; }
+    .confetti span:nth-child(3n+1) { background: #f5b400; }
+    .confetti span:nth-child(3n+2) { background: #16b94a; }
+    .confetti span:nth-child(4n) { transform: rotate(35deg); }
+    .confetti span:nth-child(4n+1) { transform: rotate(-25deg); }
+    .confetti span:nth-child(4n+2) { transform: rotate(65deg); }
+    .confetti span:nth-child(4n+3) { transform: rotate(-55deg); }
+
+    @keyframes confetti-burst {
+        0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+        100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(420deg); }
+    }
+
     .history-list {
         display: grid;
         gap: 10px;
@@ -1453,18 +1565,44 @@ ${error.message}`);
         const correctAnswers = score.correct;
         const totalWords = currentResults.filter(Boolean).length;
 
+        const percentage = totalAnswers ? Math.round(correctAnswers / totalAnswers * 100) : 0;
+        const ringClass = percentage > 90 ? "green" : percentage > 80 ? "yellow" : "red";
+        const circumference = 2 * Math.PI * 110;
+        const offset = circumference * (1 - percentage / 100);
+        const confetti = percentage === 100 ? `
+            <div class="confetti" aria-hidden="true">
+                ${Array.from({ length: 28 }, (_, i) => {
+                    const angle = (i / 28) * Math.PI * 2;
+                    const radius = 105 + (i % 4) * 24;
+                    const x = Math.round(Math.cos(angle) * radius);
+                    const y = Math.round(Math.sin(angle) * radius);
+                    return `<span style="--x:${x}px;--y:${y}px;animation-delay:${(i % 7) * 0.025}s"></span>`;
+                }).join("")}
+            </div>` : "";
+
         $("summaryStats").innerHTML = `
-            <div>
-                <div class="summary-number">${correctAnswers} / ${totalAnswers}</div>
-                <div class="summary-label">helyes válasz</div>
+            <div class="score-result">
+                ${confetti}
+                <div class="score-ring ${ringClass}">
+                    <svg viewBox="0 0 250 250" aria-label="${percentage}% eredmény">
+                        <circle class="score-ring-track" cx="125" cy="125" r="110"></circle>
+                        <circle class="score-ring-value" cx="125" cy="125" r="110" style="stroke-dashoffset:${offset};"></circle>
+                    </svg>
+                    <div class="score-center">
+                        <div class="score-percent">${percentage}%</div>
+                        <div class="score-caption">Kör vége</div>
+                    </div>
+                </div>
             </div>
-            <div>
-                <div class="summary-number">${totalAnswers ? Math.round(correctAnswers / totalAnswers * 100) : 0}%</div>
-                <div class="summary-label">összes beírt válaszból</div>
-            </div>
-            <div>
-                <div class="summary-number">${totalWords}</div>
-                <div class="summary-label">megtanult elem</div>
+            <div class="score-stats">
+                <div>
+                    <div class="summary-number">${correctAnswers} / ${totalAnswers}</div>
+                    <div class="summary-label">helyes válasz</div>
+                </div>
+                <div>
+                    <div class="summary-number">${totalWords}</div>
+                    <div class="summary-label">megtanult elem</div>
+                </div>
             </div>
         `;
 
