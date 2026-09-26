@@ -75,6 +75,25 @@
         transform: translateY(-1px);
     }
 
+    .catalog-button.selected {
+        background: #dbeafe;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, .12);
+    }
+
+    .catalog-check {
+        float: right;
+        font-weight: 800;
+        color: var(--good);
+        margin-left: 10px;
+    }
+
+    .catalog-actions {
+        display:flex;
+        justify-content:flex-end;
+        margin-top:18px;
+    }
+
     .group-choice { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:20px; }
     .group-choice button { min-height:90px; font-size:18px; font-weight:650; }
     .choice-button { background:#eef2ff; color:#312e81; border:1px solid #c7d2fe; }
@@ -123,6 +142,20 @@
     .verb-feedback-line {
         font-weight: 600;
     }
+
+    .noun-question .word { margin-bottom:18px; }
+    .multi-answer-prefix {
+        font-weight: 650;
+        white-space: nowrap;
+    }
+    .multi-answer-row {
+        display:grid;
+        grid-template-columns: 130px minmax(0,1fr);
+        align-items:center;
+        gap:10px;
+        text-align:left;
+    }
+    .mixed-question .word { margin-bottom:18px; }
 
     .primary {
         background: var(--accent);
@@ -376,6 +409,9 @@
             <button id="historyButton" class="secondary">Előzmények</button>
         </div>
         <div id="catalogList" class="catalog-list"></div>
+        <div class="catalog-actions">
+            <button id="catalogGoButton" class="primary" disabled>Mehet ▶</button>
+        </div>
         <div id="catalogError"></div>
     </section>
 
@@ -462,6 +498,27 @@
         <div id="verbCurrentResults" class="results"></div>
     </section>
 
+    <section id="mixedPracticeScreen" class="card hidden">
+        <div class="topbar">
+            <div>
+                <h2 id="mixedPracticeTitle"></h2>
+                <div id="mixedCounter" class="subtitle" style="margin:0"></div>
+            </div>
+            <button id="mixedBackButton" class="secondary">Vissza</button>
+        </div>
+
+        <div class="progress"><div id="mixedProgressBar"></div></div>
+
+        <div class="question mixed-question">
+            <div id="mixedQuestionLabel" class="question-label"></div>
+            <div id="mixedQuestionWord" class="word"></div>
+            <form id="mixedAnswerForm" class="verb-answers"></form>
+            <div id="mixedFeedback" class="feedback"></div>
+        </div>
+
+        <div id="mixedCurrentResults" class="results"></div>
+    </section>
+
     <section id="summaryScreen" class="card hidden">
         <div class="topbar">
             <h2>Kör vége</h2>
@@ -509,7 +566,7 @@
 
     function show(screenId) {
         ["catalogScreen", "groupChoiceScreen", "wordListScreen",
-         "practiceScreen", "verbPracticeScreen", "summaryScreen",
+         "practiceScreen", "verbPracticeScreen", "mixedPracticeScreen", "summaryScreen",
          "historyScreen", "historyDetailScreen"].forEach(id => {
             $(id).classList.toggle("hidden", id !== screenId);
         });
@@ -539,29 +596,26 @@
         }
     }
 
-    function saveHistory() {
-        const history = loadHistory();
-        const isVerbGroup = currentCatalog.type === "verbs";
-
-        const allAttempts = currentResults
-            .filter(Boolean)
-            .flatMap(x => x.attempts || []);
-
-        let score;
-        if (isVerbGroup) {
-            score = {
-                correct: allAttempts.reduce((sum, attempt) =>
-                    sum + (attempt.praesensCorrect ? 1 : 0) +
-                    (attempt.praeteritumCorrect ? 1 : 0) +
-                    (attempt.perfektCorrect ? 1 : 0), 0),
-                total: allAttempts.length * 3
-            };
-        } else {
-            score = {
-                correct: allAttempts.filter(attempt => attempt.correct).length,
-                total: allAttempts.length
+    function getAttemptScore(attempt) {
+        if (typeof attempt.answerCount === "number" && typeof attempt.correctCount === "number") {
+            return { correct: attempt.correctCount, total: attempt.answerCount };
+        }
+        if (typeof attempt.praesensCorrect === "boolean") {
+            return {
+                correct: (attempt.praesensCorrect ? 1 : 0) + (attempt.praeteritumCorrect ? 1 : 0) + (attempt.perfektCorrect ? 1 : 0),
+                total: 3
             };
         }
+        return { correct: attempt.correct ? 1 : 0, total: 1 };
+    }
+
+    function saveHistory() {
+        const history = loadHistory();
+        const allAttempts = currentResults.filter(Boolean).flatMap(x => x.attempts || []);
+        const score = {
+            correct: allAttempts.reduce((sum, attempt) => sum + getAttemptScore(attempt).correct, 0),
+            total: allAttempts.reduce((sum, attempt) => sum + getAttemptScore(attempt).total, 0)
+        };
 
         history.unshift({
             id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
@@ -573,8 +627,12 @@
             score,
             questions: currentResults.filter(Boolean).map(x => ({
                 hu: x.hu,
+                type: x.type || null,
                 infinitiv: x.infinitiv || null,
                 praesens: x.praesens || null,
+                singular: x.singular || null,
+                plural: x.plural || null,
+                article: x.article || null,
                 expected: x.expected || null,
                 praeteritum: x.praeteritum || null,
                 perfekt: x.perfekt || null,
@@ -618,6 +676,8 @@
     function renderCatalog() {
         const container = $("catalogList");
         container.innerHTML = "";
+        $("catalogGoButton").disabled = true;
+        currentCatalog = null;
 
         if (catalog.length === 0) {
             container.innerHTML = `<div class="empty">Nincs szócsoport a katalógusban.</div>`;
@@ -627,10 +687,27 @@
         catalog.forEach((item, index) => {
             const button = document.createElement("button");
             button.className = "catalog-button";
-            button.textContent = item.friendlyName || `Szócsoport ${index + 1}`;
-            button.addEventListener("click", () => showGroupChoice(item));
+            button.type = "button";
+            button.innerHTML = `<span>${escapeHtml(item.friendlyName || `Szócsoport ${index + 1}`)}</span>`;
+            button.addEventListener("click", () => {
+                document.querySelectorAll(".catalog-button").forEach(b => {
+                    b.classList.remove("selected");
+                    const check = b.querySelector(".catalog-check");
+                    if (check) check.remove();
+                });
+                button.classList.add("selected");
+                button.insertAdjacentHTML("beforeend", `<span class="catalog-check">✓</span>`);
+                currentCatalog = item;
+                $("catalogGoButton").disabled = false;
+            });
             container.appendChild(button);
         });
+    }
+
+    function goToSelectedGroup() {
+        if (!currentCatalog) return;
+        $("groupChoiceTitle").textContent = currentCatalog.friendlyName || "Szócsoport";
+        show("groupChoiceScreen");
     }
 
     function showGroupChoice(item) {
@@ -647,52 +724,79 @@
 
         const type = item.type || "words";
 
+        const normalizeMixedItem = x => {
+            if (!x || typeof x !== "object") return null;
+
+            if (x.type === "verb" || (!x.type && typeof x.infinitiv === "string")) {
+                if (typeof x.infinitiv !== "string" || typeof x.hu !== "string" ||
+                    typeof x.praesens !== "string" || typeof x.praeteritum !== "string" ||
+                    typeof x.perfekt !== "string") return null;
+                return { ...x, type: "verb" };
+            }
+
+            if (x.type === "noun" || (!x.type && typeof x.singular === "string" && typeof x.plural === "string")) {
+                if (typeof x.hu !== "string" || typeof x.singular !== "string" || typeof x.plural !== "string") return null;
+                return { ...x, type: "noun", article: x.article || "die" };
+            }
+
+            if (x.type === "word" || (!x.type && typeof x.de === "string" && typeof x.hu === "string")) {
+                if (typeof x.hu !== "string" || typeof x.de !== "string") return null;
+                return { ...x, type: "word" };
+            }
+
+            return null;
+        };
+
         if (type === "verbs") {
             const items = data.filter(x =>
-                x &&
-                typeof x.infinitiv === "string" &&
-                typeof x.hu === "string" &&
-                typeof x.praesens === "string" &&
-                typeof x.praeteritum === "string" &&
+                x && typeof x.infinitiv === "string" && typeof x.hu === "string" &&
+                typeof x.praesens === "string" && typeof x.praeteritum === "string" &&
                 typeof x.perfekt === "string"
-            );
+            ).map(x => ({ ...x, type: "verb" }));
             if (!items.length) throw new Error("Az ige JSON-ban nincs érvényes ige.");
             return { type: "verbs", items };
         }
 
-        // Régi típusok kompatibilitása: ezeket már nem javasolt használni,
-        // de a korábbi fájlok továbbra is betölthetők.
+        if (type === "mixed") {
+            const items = data.map(normalizeMixedItem).filter(Boolean);
+            if (!items.length) throw new Error("A vegyes szócsoportban nincs érvényes elem.");
+            return { type: "mixed", items };
+        }
+
+        // Régi típusok kompatibilitása.
         if (type === "praeteritum" || type === "perfekt") {
-            const items = data.filter(x =>
-                x && typeof x.infinitiv === "string" && typeof x.hu === "string"
-            );
+            const items = data.filter(x => x && typeof x.infinitiv === "string" && typeof x.hu === "string")
+                .map(x => ({ ...x, type: "verb" }));
             if (!items.length) throw new Error("Az ige JSON-ban nincs érvényes ige.");
             return { type: "verbs", items };
         }
 
-        const items = data.filter(x => x && typeof x.hu === "string" && typeof x.de === "string");
+        const items = data.filter(x => x && typeof x.hu === "string" && typeof x.de === "string")
+            .map(x => ({ ...x, type: "word" }));
         if (!items.length) throw new Error("A szócsoportban nincs érvényes szó.");
         return { type: "words", items };
+    }
+
+    function itemSortKey(word) {
+        return word.type === "verb" ? word.infinitiv : word.type === "noun" ? word.singular : word.de;
     }
 
     async function showWordList(item) {
         try {
             const data = await loadGroupData(item);
-            const sortedItems = [...data.items].sort((a, b) => {
-                const aa = data.type === "words" ? a.de : a.infinitiv;
-                const bb = data.type === "words" ? b.de : b.infinitiv;
-                return aa.localeCompare(bb, "de", { sensitivity: "base" });
-            });
+            const sortedItems = [...data.items].sort((a, b) =>
+                itemSortKey(a).localeCompare(itemSortKey(b), "de", { sensitivity: "base" })
+            );
 
             $("wordListTitle").textContent = item.friendlyName || "Szócsoport";
-            $("wordListCount").textContent = `${sortedItems.length} ${data.type === "words" ? "szó" : "ige"}`;
+            $("wordListCount").textContent = `${sortedItems.length} elem`;
 
             if (data.type === "words") {
                 $("wordList").innerHTML = `
                     <div class="word-list-row word-list-header"><div>Német</div><div></div><div>Magyar</div></div>
                     ${sortedItems.map(word => `<div class="word-list-row"><div class="german">${escapeHtml(word.de)}</div><div class="dash">-</div><div>${escapeHtml(word.hu)}</div></div>`).join("")}
                 `;
-            } else {
+            } else if (data.type === "verbs") {
                 $("wordList").innerHTML = `
                     <div class="verb-list-row verb-list-header"><div>Infinitiv</div><div>Präsens</div><div>Präteritum</div><div>Perfekt</div></div>
                     ${sortedItems.map(word => `
@@ -704,6 +808,23 @@
                         </div>
                     `).join("")}
                 `;
+            } else {
+                $("wordList").innerHTML = sortedItems.map(word => {
+                    if (word.type === "verb") {
+                        return `
+                            <div class="verb-list-row verb-list-header"><div>Infinitiv</div><div>Präsens</div><div>Präteritum</div><div>Perfekt</div></div>
+                            <div class="verb-list-row">
+                                <div class="german">${escapeHtml(word.infinitiv)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div>
+                                <div>${escapeHtml(word.praesens)}</div><div>${escapeHtml(word.praeteritum)}</div><div>${escapeHtml(word.perfekt)}</div>
+                            </div>`;
+                    }
+                    if (word.type === "noun") {
+                        return `
+                            <div class="word-list-row word-list-header"><div>Singular</div><div></div><div>Plural</div></div>
+                            <div class="word-list-row"><div class="german">${escapeHtml(word.article || "die")} ${escapeHtml(word.singular)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div><div class="dash">-</div><div>${escapeHtml(word.article || "die")} ${escapeHtml(word.plural)}</div></div>`;
+                    }
+                    return `<div class="word-list-row"><div class="german">${escapeHtml(word.de)}</div><div class="dash">-</div><div>${escapeHtml(word.hu)}</div></div>`;
+                }).join("");
             }
             show("wordListScreen");
         } catch (error) {
@@ -719,6 +840,11 @@ ${error.message}`);
 
             if (data.type === "verbs") {
                 startVerbPractice(item, data.items);
+                return;
+            }
+
+            if (data.type === "mixed") {
+                startMixedPractice(item, data.items);
                 return;
             }
 
@@ -925,6 +1051,153 @@ ${error.message}`);
         `;
     }
 
+    function startMixedPractice(item, items) {
+        currentCatalog = item;
+        words = shuffle(items);
+        currentWordIndex = 0;
+        currentResults = [];
+        roundQueue = words.map((word, index) => ({ word, originalIndex: index }));
+        roundNumber = 1;
+        answered = false;
+        $("mixedPracticeTitle").textContent = item.friendlyName;
+        $("mixedFeedback").className = "feedback";
+        $("mixedFeedback").textContent = "";
+        $("mixedCurrentResults").innerHTML = "";
+        show("mixedPracticeScreen");
+        renderMixedQuestion();
+    }
+
+    function renderMixedQuestion() {
+        const item = roundQueue[currentWordIndex];
+        const word = item.word;
+        answered = false;
+
+        $("mixedCounter").textContent = `${currentWordIndex + 1} / ${roundQueue.length} · ${roundNumber}. kör`;
+        $("mixedQuestionWord").textContent = word.hu;
+        $("mixedFeedback").className = "feedback";
+        $("mixedFeedback").textContent = "";
+        $("mixedProgressBar").style.width = `${(currentWordIndex / roundQueue.length) * 100}%`;
+
+        const form = $("mixedAnswerForm");
+        if (word.type === "verb") {
+            $("mixedQuestionLabel").textContent = `Írd le a megadott ige három alakját: ${word.infinitiv} (${word.hu})`;
+            form.innerHTML = `
+                <div class="multi-answer-row"><label>Präsens (E/3):</label><input id="mixedA1" type="text" autocomplete="off" spellcheck="false"></div>
+                <div class="multi-answer-row"><label>Präteritum:</label><input id="mixedA2" type="text" autocomplete="off" spellcheck="false"></div>
+                <div class="multi-answer-row"><label>Perfekt:</label><input id="mixedA3" type="text" autocomplete="off" spellcheck="false"></div>
+                <button class="primary" type="submit">Ellenőrzés</button>`;
+        } else if (word.type === "noun") {
+            $("mixedQuestionLabel").textContent = "Írd le a főnév két alakját:";
+            form.innerHTML = `
+                <div class="multi-answer-row"><label>Singular:</label><div style="display:flex;align-items:center;gap:8px"><span class="multi-answer-prefix">${escapeHtml(word.article || "die")}</span><input id="mixedA1" type="text" autocomplete="off" spellcheck="false"></div></div>
+                <div class="multi-answer-row"><label>Plural:</label><div style="display:flex;align-items:center;gap:8px"><span class="multi-answer-prefix">${escapeHtml(word.article || "die")}</span><input id="mixedA2" type="text" autocomplete="off" spellcheck="false"></div></div>
+                <button class="primary" type="submit">Ellenőrzés</button>`;
+        } else {
+            $("mixedQuestionLabel").textContent = "Fordítsd németre:";
+            form.innerHTML = `<input id="mixedA1" type="text" autocomplete="off" spellcheck="false"><button class="primary" type="submit">Ellenőrzés</button>`;
+        }
+
+        setTimeout(() => $("mixedA1").focus(), 0);
+    }
+
+    function checkMixedAnswer() {
+        if (answered) return;
+
+        const item = roundQueue[currentWordIndex];
+        const word = item.word;
+        const answers = [];
+        const expected = [];
+        const labels = [];
+
+        if (word.type === "verb") {
+            answers.push(normalizeAnswer($("mixedA1").value), normalizeAnswer($("mixedA2").value), normalizeAnswer($("mixedA3").value));
+            expected.push(normalizeAnswer(word.praesens), normalizeAnswer(word.praeteritum), normalizeAnswer(word.perfekt));
+            labels.push("Präsens", "Präteritum", "Perfekt");
+        } else if (word.type === "noun") {
+            answers.push(normalizeAnswer($("mixedA1").value), normalizeAnswer($("mixedA2").value));
+            expected.push(normalizeAnswer(word.singular), normalizeAnswer(word.plural));
+            labels.push("Singular", "Plural");
+        } else {
+            answers.push(normalizeAnswer($("mixedA1").value));
+            expected.push(normalizeAnswer(word.de));
+            labels.push("Válasz");
+        }
+
+        const correctFlags = answers.map((answer, i) => answer === expected[i]);
+        const correct = correctFlags.every(Boolean);
+        answered = true;
+
+        if (!currentResults[item.originalIndex]) {
+            currentResults[item.originalIndex] = {
+                type: word.type,
+                hu: word.hu,
+                infinitiv: word.infinitiv || null,
+                praesens: word.praesens || null,
+                praeteritum: word.praeteritum || null,
+                perfekt: word.perfekt || null,
+                singular: word.singular || null,
+                plural: word.plural || null,
+                article: word.article || null,
+                expected: word.de || null,
+                attempts: [],
+                correct: false
+            };
+        }
+
+        const result = currentResults[item.originalIndex];
+        result.attempts.push({ answers, expected, correctFlags, correct, round: roundNumber, answer: answers[0] || "", answerCount: answers.length, correctCount: correctFlags.filter(Boolean).length });
+        if (correct) result.correct = true;
+
+        const feedback = $("mixedFeedback");
+        if (correct) {
+            feedback.className = "feedback good";
+            feedback.innerHTML = word.type === "verb" ? "✓ Mindhárom alak helyes!" : word.type === "noun" ? "✓ Mindkét alak helyes!" : "✓ Helyes!";
+        } else {
+            feedback.className = "feedback bad";
+            feedback.innerHTML = `
+                <div>✕ Nem jó, ezt újra kérdezzük.</div>
+                <div class="verb-feedback-lines">
+                    ${expected.map((value, i) => `<div class="verb-feedback-line">${escapeHtml(labels[i])}: ${correctFlags[i] ? "✓ helyes" : `✕ helyes: <strong>${escapeHtml(value)}</strong>`}</div>`).join("")}
+                </div>
+                <button id="wrongMixedAnswerOk" class="primary" type="button" style="margin-top:12px;">OK</button>`;
+        }
+
+        [...$("mixedAnswerForm").querySelectorAll("input")].forEach(input => input.disabled = true);
+        $("mixedProgressBar").style.width = `${((currentWordIndex + 1) / roundQueue.length) * 100}%`;
+        renderMixedCurrentResults();
+
+        if (correct) setTimeout(advanceToNextMixed, 1400);
+        else { $("wrongMixedAnswerOk").focus(); $("wrongMixedAnswerOk").addEventListener("click", advanceToNextMixed); }
+    }
+
+    function advanceToNextMixed() {
+        if (!answered) return;
+        currentWordIndex++;
+        if (currentWordIndex >= roundQueue.length) {
+            const retryQueue = roundQueue.filter(item => !currentResults[item.originalIndex].correct);
+            if (retryQueue.length === 0) { finishPractice(); return; }
+            roundQueue = shuffle(retryQueue);
+            currentWordIndex = 0;
+            roundNumber++;
+            renderMixedCurrentResults();
+            renderMixedQuestion();
+        } else renderMixedQuestion();
+    }
+
+    function renderMixedCurrentResults() {
+        const completed = currentResults.filter(Boolean);
+        const retryMode = roundNumber > 1;
+        $("mixedCurrentResults").innerHTML = `
+            <div class="round-summary"><strong>${completed.filter(x => x.correct).length} / ${completed.length}</strong> elem már teljesen helyes</div>
+            ${completed.map(item => {
+                const last = item.attempts[item.attempts.length - 1];
+                const title = item.type === "verb" ? `${item.infinitiv} (${item.hu})` : item.type === "noun" ? `${item.article || "die"} ${item.singular} (${item.hu})` : item.hu;
+                return retryMode ? `
+                    <div class="result-item locked-result"><div class="result-icon ${item.correct ? "good" : "bad"}">${item.correct ? "✓" : "✕"}</div><div><div class="result-hu">${escapeHtml(title)}</div><div class="result-detail">${item.correct ? "Helyes" : "Újra kérdezzük"}</div></div></div>` : `
+                    <details class="result-item"><summary><span class="result-icon ${item.correct ? "good" : "bad"}">${item.correct ? "✓" : "✕"}</span><span><span class="result-hu">${escapeHtml(title)}</span><span class="result-detail">${item.correct ? "Helyes" : "Hibás"}</span></span></summary><div class="result-attempts">${(item.attempts || []).map((a,i) => `<div>${i+1}. kör: ${a.correct ? "✓" : "✕"} ${a.answers.map((x,j)=>`<strong>${escapeHtml(x || "(üres)")}</strong>`).join(" · ")}</div>`).join("")}</div></details>`;
+            }).join("")}`;
+    }
+
     function renderQuestion() {
         const item = roundQueue[currentWordIndex];
         const word = item.word;
@@ -1097,14 +1370,12 @@ ${error.message}`);
             .filter(Boolean)
             .flatMap(item => item.attempts || []);
 
-        const isVerbGroup = currentCatalog.type === "verbs";
-        const totalAnswers = isVerbGroup ? allAttempts.length * 3 : allAttempts.length;
-        const correctAnswers = isVerbGroup
-            ? allAttempts.reduce((sum, attempt) =>
-                sum + (attempt.praesensCorrect ? 1 : 0) +
-                (attempt.praeteritumCorrect ? 1 : 0) +
-                (attempt.perfektCorrect ? 1 : 0), 0)
-            : allAttempts.filter(attempt => attempt.correct).length;
+        const score = allAttempts.reduce((sum, attempt) => {
+            const s = getAttemptScore(attempt);
+            return { correct: sum.correct + s.correct, total: sum.total + s.total };
+        }, { correct: 0, total: 0 });
+        const totalAnswers = score.total;
+        const correctAnswers = score.correct;
         const totalWords = currentResults.filter(Boolean).length;
 
         $("summaryStats").innerHTML = `
@@ -1118,7 +1389,7 @@ ${error.message}`);
             </div>
             <div>
                 <div class="summary-number">${totalWords}</div>
-                <div class="summary-label">${isVerbGroup ? "megtanult ige" : "megtanult szó"}</div>
+                <div class="summary-label">megtanult elem</div>
             </div>
         `;
 
@@ -1159,6 +1430,22 @@ ${error.message}`);
                     </div>
                 </details>
             `;
+        }
+
+        if (item.singular && item.plural) {
+            return `
+                <details class="result-item">
+                    <summary>
+                        <span class="result-icon good">✓</span>
+                        <span><span class="result-hu">${escapeHtml(item.article || "die")} ${escapeHtml(item.singular)} (${escapeHtml(item.hu)})</span><span class="result-detail">${attempts.length === 1 ? "Elsőre mindkét alak helyes" : `${attempts.length}. próbálkozásra lett helyes`}</span></span>
+                    </summary>
+                    <div class="result-attempts">
+                        ${attempts.map((attempt, index) => `
+                            <div>${index + 1}. kör: ${attempt.correct ? "✓" : "✕"} <strong>${escapeHtml(attempt.answers ? attempt.answers.join(" · ") : (attempt.answer || "(üres)"))}</strong>
+                            ${attempt.correct ? "" : `<br>Helyes: <strong>${escapeHtml(item.singular)}</strong> · <strong>${escapeHtml(item.plural)}</strong>`}</div>
+                        `).join("")}
+                    </div>
+                </details>`;
         }
 
         return `
@@ -1243,6 +1530,8 @@ ${error.message}`);
             .replaceAll("'", "&#039;");
     }
 
+    $("catalogGoButton").addEventListener("click", goToSelectedGroup);
+
     $("answerForm").addEventListener("submit", event => {
         event.preventDefault();
         checkAnswer();
@@ -1253,6 +1542,11 @@ ${error.message}`);
         checkVerbAnswer();
     });
 
+    $("mixedAnswerForm").addEventListener("submit", event => {
+        event.preventDefault();
+        checkMixedAnswer();
+    });
+
     $("groupChoiceBackButton").addEventListener("click", () => show("catalogScreen"));
     $("viewWordsButton").addEventListener("click", () => showWordList(currentCatalog));
     $("startPracticeButton").addEventListener("click", () => startPractice(currentCatalog));
@@ -1260,6 +1554,7 @@ ${error.message}`);
 
     $("backButton").addEventListener("click", () => show("catalogScreen"));
     $("verbBackButton").addEventListener("click", () => show("catalogScreen"));
+    $("mixedBackButton").addEventListener("click", () => show("catalogScreen"));
     $("summaryBackButton").addEventListener("click", () => show("catalogScreen"));
     $("historyButton").addEventListener("click", () => {
         renderHistory();
