@@ -340,6 +340,13 @@
         align-items: start;
     }
 
+    details.result-item > summary > span:last-child,
+    .locked-result > :last-child {
+        min-width: 0;
+        display: grid;
+        gap: 2px;
+    }
+
     .result-icon {
         line-height: 26px;
     }
@@ -347,8 +354,14 @@
     .result-icon.good { color: var(--good); font-weight: 800; }
     .result-icon.bad { color: var(--bad); font-weight: 800; }
 
-    .result-hu { font-weight: 600; }
-    .result-detail { color: var(--muted); }
+    .result-hu {
+        display: block;
+        font-weight: 600;
+    }
+    .result-detail {
+        display: block;
+        color: var(--muted);
+    }
     .result-detail strong { color: var(--text); }
 
     .summary {
