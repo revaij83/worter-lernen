@@ -75,6 +75,20 @@
         transform: translateY(-1px);
     }
 
+    .word-list-type-title {
+      margin-top: 22px;
+      margin-bottom: 4px;
+      padding-top: 8px;
+      font-size: 17px;
+      font-weight: 700;
+      color: #163a63;
+      border-top: 1px solid #dfe3ea;
+    }
+    .word-list-type-title:first-child {
+      margin-top: 0;
+      border-top: 0;
+    }
+
     .catalog-button.selected {
         background: #dbeafe;
         border-color: var(--accent);
@@ -853,21 +867,34 @@ ${error.message}`);
                     `).join("")}
                 `;
             } else {
-                $("wordList").innerHTML = sortedItems.map(word => {
-                    if (word.type === "verb") {
-                        return `
-                            <div class="verb-list-row verb-list-header"><div>Infinitiv</div><div>Präsens</div><div>Präteritum</div><div>Perfekt</div></div>
-                            <div class="verb-list-row">
-                                <div class="german">${escapeHtml(word.infinitiv)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div>
-                                <div>${escapeHtml(word.praesens)}</div><div>${escapeHtml(word.praeteritum)}</div><div>${escapeHtml(word.perfekt)}</div>
-                            </div>`;
+                const groups = [
+                    {
+                        type: "word",
+                        title: "Szavak",
+                        items: sortedItems.filter(word => word.type === "word"),
+                        render: word => `<div class="word-list-row"><div class="german">${escapeHtml(word.de)}</div><div class="dash">-</div><div>${escapeHtml(word.hu)}</div></div>`
+                    },
+                    {
+                        type: "noun",
+                        title: "Főnevek",
+                        items: sortedItems.filter(word => word.type === "noun"),
+                        render: word => `<div class="word-list-row"><div class="german">${escapeHtml(word.singular)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div><div class="dash">-</div><div>${escapeHtml(word.plural)}</div></div>`
+                    },
+                    {
+                        type: "verb",
+                        title: "Igék",
+                        items: sortedItems.filter(word => word.type === "verb"),
+                        render: word => `<div class="verb-list-row"><div class="german">${escapeHtml(word.infinitiv)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div><div>${escapeHtml(word.praesens)}</div><div>${escapeHtml(word.praeteritum)}</div><div>${escapeHtml(word.perfekt)}</div></div>`
                     }
-                    if (word.type === "noun") {
-                        return `
-                            <div class="word-list-row word-list-header"><div>Singular</div><div></div><div>Plural</div></div>
-                            <div class="word-list-row"><div class="german">${escapeHtml(word.singular)} <span class="verb-hu">(${escapeHtml(word.hu)})</span></div><div class="dash">-</div><div>${escapeHtml(word.plural)}</div></div>`;
-                    }
-                    return `<div class="word-list-row"><div class="german">${escapeHtml(word.de)}</div><div class="dash">-</div><div>${escapeHtml(word.hu)}</div></div>`;
+                ];
+
+                $("wordList").innerHTML = groups.filter(group => group.items.length).map(group => {
+                    const header = group.type === "verb"
+                        ? `<div class="verb-list-row verb-list-header"><div>Infinitiv</div><div>Präsens</div><div>Präteritum</div><div>Perfekt</div></div>`
+                        : group.type === "noun"
+                            ? `<div class="word-list-row word-list-header"><div>Singular</div><div></div><div>Plural</div></div>`
+                            : `<div class="word-list-row word-list-header"><div>Német</div><div></div><div>Magyar</div></div>`;
+                    return `<div class="word-list-type-title">${group.title}</div>${header}${group.items.map(group.render).join("")}`;
                 }).join("");
             }
             show("wordListScreen");
