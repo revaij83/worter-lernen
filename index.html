@@ -943,24 +943,10 @@ ${error.message}`);
             return { type: "verbs", items };
         }
 
-        const items = data.map(x => {
-            if (!x || typeof x.hu !== "string") return null;
-
-            // A plural típusú rekordok két alakot tartalmazó főnevek.
-            // Ezeket noun-ként normalizáljuk, hogy a vegyes gyakorlásban
-            // ugyanúgy megjelenjenek, mint a többi kétalakú főnév.
-            if (x.type === "plural" || (typeof x.singular === "string" && typeof x.plural === "string")) {
-                return { ...x, type: "noun", article: x.article || "die" };
-            }
-
-            if (typeof x.de === "string") {
-                return { ...x, type: "word" };
-            }
-
-            return null;
-        }).filter(Boolean);
+        const items = data.filter(x => x && typeof x.hu === "string" && typeof x.de === "string")
+            .map(x => ({ ...x, type: "word" }));
         if (!items.length) throw new Error("A szócsoportban nincs érvényes szó.");
-        return { type: "mixed", items };
+        return { type: "words", items };
     }
 
     function itemSortKey(word) {
@@ -1394,7 +1380,7 @@ ${error.message}`);
             <div class="round-summary"><strong>${completed.filter(x => x.correct).length} / ${completed.length}</strong> elem már teljesen helyes</div>
             ${completed.map(item => {
                 const last = item.attempts[item.attempts.length - 1];
-                const title = item.type === "verb" ? `${item.infinitiv} (${item.hu})` : item.type === "noun" ? `${item.singular} (${item.hu})` : item.hu;
+                const title = item.type === "verb" ? `${item.infinitiv} (${item.hu})` : item.type === "noun" ? `${item.article || "die"} ${item.singular} (${item.hu})` : item.hu;
                 return retryMode ? `
                     <div class="result-item locked-result"><div class="result-icon ${item.correct ? "good" : "bad"}">${item.correct ? "✓" : "✕"}</div><div><div class="result-hu">${escapeHtml(title)}</div><div class="result-detail">${item.correct ? "Helyes" : "Újra kérdezzük"}</div></div></div>` : `
                     <details class="result-item"><summary><span class="result-icon ${item.correct ? "good" : "bad"}">${item.correct ? "✓" : "✕"}</span><span><span class="result-hu">${escapeHtml(title)}</span><span class="result-detail">${item.correct ? "Helyes" : "Hibás"}</span></span></summary><div class="result-attempts">${(item.attempts || []).map((a,i) => `<div>${i+1}. kör: ${a.correct ? "✓" : "✕"} ${a.answers.map((x,j)=>`<strong>${escapeHtml(x || "(üres)")}</strong>`).join(" · ")}</div>`).join("")}</div></details>`;
