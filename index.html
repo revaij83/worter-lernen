@@ -1144,14 +1144,18 @@ ${error.message}`);
         answered = false;
 
         $("mixedCounter").textContent = `${currentWordIndex + 1} / ${roundQueue.length} · ${roundNumber}. kör`;
-        $("mixedQuestionWord").textContent = word.hu;
+        if (word.type === "verb") {
+            $("mixedQuestionWord").innerHTML = `<div class="verb-question-infinitiv">${escapeHtml(word.infinitiv)}</div><div class="verb-question-hu">(${escapeHtml(word.hu)})</div>`;
+        } else {
+            $("mixedQuestionWord").textContent = word.hu;
+        }
         $("mixedFeedback").className = "feedback";
         $("mixedFeedback").textContent = "";
         $("mixedProgressBar").style.width = `${(currentWordIndex / roundQueue.length) * 100}%`;
 
         const form = $("mixedAnswerForm");
         if (word.type === "verb") {
-            $("mixedQuestionLabel").textContent = `Írd le a megadott ige három alakját: ${word.infinitiv} (${word.hu})`;
+            $("mixedQuestionLabel").textContent = "Írd le a megadott ige három alakját:";
             form.innerHTML = `
                 <div class="multi-answer-row"><label>Präsens (E/3):</label><input id="mixedA1" type="text" autocomplete="off" spellcheck="false"></div>
                 <div class="multi-answer-row"><label>Präteritum:</label><input id="mixedA2" type="text" autocomplete="off" spellcheck="false"></div>
